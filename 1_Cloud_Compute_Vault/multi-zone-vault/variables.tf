@@ -27,13 +27,11 @@ variable "subnet4-region1" {
 }
 
 variable "vpc_name" {
-  type    = string
-  default = "global-vpc"
+  type = string
 }
 
 variable "project_id" {
-  type    = string
-  default = "hc-481920a3f7e54d39b33d0454ff9"
+  type = string
 }
 
 variable "environment" {
@@ -62,7 +60,6 @@ variable "storage_location" {
 variable "vault_license_filepath" {
   type        = string
   description = "Filepath to location of Vault license file"
-  default     = "/Users/jose/Demo/Vault_ADP/ADP_PlayGround/vault.hclic"
 }
 
 variable "vault_license_name" {

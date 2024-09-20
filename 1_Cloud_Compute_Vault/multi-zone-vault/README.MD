@@ -1,0 +1,1 @@
+In this first repo we are going to deploy the archetypical Vault Deployment as described in the [Raft Reference Architecture](https://developer.hashicorp.com/vault/tutorials/day-one-raft/raft-reference-architecture).

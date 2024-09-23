@@ -1,9 +1,5 @@
 provider "terracurl" {}
 
-locals {
-  fqdn = substr(google_dns_record_set.vip.name, 0, length(google_dns_record_set.vip.name) - 1)
-}
-
 resource "time_sleep" "wait_60_seconds" {
   depends_on      = [google_compute_forwarding_rule.ext-lb2, acme_certificate.certificate]
   create_duration = "60s"
@@ -33,7 +29,6 @@ EOF
     204,
     400 # In case Vault is already inicialized
   ]
-
 }
 
 output "response" {
@@ -43,7 +38,7 @@ output "response" {
 
 # Create a Secret
 resource "google_secret_manager_secret" "tokens" {
-  secret_id = "vault-init-token"
+  secret_id = "${var.cluster-name}-${var.region1}-init-token-${random_string.vault.result}"
   replication {
     auto {
     }

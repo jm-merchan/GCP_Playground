@@ -1,6 +1,6 @@
 # Create a global VPC
 resource "google_compute_network" "global_vpc" {
-  name                    = var.vpc_name
+  name                    = "${var.vpc_name}-${random_string.vault.result}"
   auto_create_subnetworks = false # Disable default subnets
 }
 
@@ -20,21 +20,21 @@ resource "google_dns_managed_zone" "private-zone" {
 
 # Create subnets in a given region
 resource "google_compute_subnetwork" "subnet1" {
-  name          = "${var.region1}-subnet1"
+  name          = "${var.region1}-subnet1-${random_string.vault.result}"
   ip_cidr_range = var.subnet1-region1
   region        = var.region1
   network       = google_compute_network.global_vpc.id
 }
 
 resource "google_compute_subnetwork" "subnet2" {
-  name          = "${var.region1}-subnet2"
+  name          = "${var.region1}-subnet2-${random_string.vault.result}"
   ip_cidr_range = var.subnet2-region1
   region        = var.region1
   network       = google_compute_network.global_vpc.id
 }
 
 resource "google_compute_subnetwork" "subnet3" {
-  name          = "${var.region1}-subnet3"
+  name          = "${var.region1}-subnet3-${random_string.vault.result}"
   ip_cidr_range = var.subnet3-region1
   region        = var.region1
   network       = google_compute_network.global_vpc.id
@@ -42,7 +42,7 @@ resource "google_compute_subnetwork" "subnet3" {
 
 # Proxy only subnet
 resource "google_compute_subnetwork" "proxy_only_subnet" {
-  name          = "${var.resource_name_prefix}-subnet4"
+  name          = "${var.region1}-subnet4-${random_string.vault.result}"
   ip_cidr_range = var.subnet4-region1
   region        = var.region1
   network       = google_compute_network.global_vpc.id
@@ -52,14 +52,14 @@ resource "google_compute_subnetwork" "proxy_only_subnet" {
 
 # Create a Cloud Router
 resource "google_compute_router" "custom_router" {
-  name    = "custom-router"
+  name    = "custom-router-${random_string.vault.result}"
   region  = var.region1
   network = google_compute_network.global_vpc.self_link
 }
 
 # Configure Cloud NAT on the Cloud Router
 resource "google_compute_router_nat" "custom_nat" {
-  name   = "custom-nat"
+  name   = "custom-nat-${random_string.vault.result}"
   router = google_compute_router.custom_router.name
   region = google_compute_router.custom_router.region
 
@@ -69,10 +69,10 @@ resource "google_compute_router_nat" "custom_nat" {
 
 
 resource "google_compute_firewall" "allow_vault_api" {
-  name    = "allow-vault-api"
+  name    = "allow-vault-api-${random_string.vault.result}"
   network = google_compute_network.global_vpc.id
 
-  allow { # Allow ports for HTTP (80) and HTTPS (443)
+  allow { 
     protocol = "tcp"
     ports = [
       "8200",
@@ -87,7 +87,7 @@ resource "google_compute_firewall" "allow_vault_api" {
 }
 
 resource "google_compute_firewall" "allow_vault_outbound" {
-  name    = "allow-vault-outbound"
+  name    = "allow-vault-outbound-${random_string.vault.result}"
   network = google_compute_network.global_vpc.id
 
   allow { # Allow ports for HTTP (80) and HTTPS (443)
@@ -100,7 +100,7 @@ resource "google_compute_firewall" "allow_vault_outbound" {
 }
 
 resource "google_compute_firewall" "allow_internal" {
-  name    = "${var.resource_name_prefix}-vault-allow-internal"
+  name    = "${var.resource_name_prefix}-vault-allow-internal-${random_string.vault.result}"
   network = google_compute_network.global_vpc.id
 
   allow {
@@ -112,7 +112,7 @@ resource "google_compute_firewall" "allow_internal" {
 }
 
 resource "google_compute_firewall" "lb_proxy" {
-  name          = "${var.resource_name_prefix}-proxy-firewall"
+  name          = "${var.resource_name_prefix}-proxy-firewall-${random_string.vault.result}"
   network       = google_compute_network.global_vpc.self_link
   source_ranges = [var.subnet1-region1, var.subnet2-region1, var.subnet3-region1]
 
@@ -125,7 +125,7 @@ resource "google_compute_firewall" "lb_proxy" {
 }
 
 resource "google_compute_firewall" "lb_healthchecks" {
-  name    = "${var.resource_name_prefix}-lb-healthcheck-firewall"
+  name    = "${var.resource_name_prefix}-lb-healthcheck-firewall-${random_string.vault.result}"
   network = google_compute_network.global_vpc.self_link
   # source_ranges = var.networking_healthcheck_ips
   source_ranges = ["0.0.0.0/0"]
@@ -138,7 +138,7 @@ resource "google_compute_firewall" "lb_healthchecks" {
 }
 
 resource "google_compute_firewall" "ssh" {
-  name    = "${var.resource_name_prefix}-ssh-firewall"
+  name    = "${var.resource_name_prefix}-ssh-firewall-${random_string.vault.result}"
   network = google_compute_network.global_vpc.self_link
 
   description   = "The firewall which allows the ingress of SSH traffic to Vault instances"

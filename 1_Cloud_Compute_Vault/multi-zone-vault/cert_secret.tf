@@ -32,7 +32,7 @@ resource "acme_registration" "registration" {
 
 resource "acme_certificate" "certificate" {
   account_key_pem = acme_registration.registration.account_key_pem
-  common_name     = "${var.cluster-name}-${var.region1}.${local.domain}"
+  common_name     = "${var.cluster-name}-${var.region1}-${random_string.vault.result}.${local.domain}"
   # subject_alternative_names = ["*.${local.domain}"] # To have wildcard
 
   dns_challenge {
@@ -45,18 +45,11 @@ resource "acme_certificate" "certificate" {
   }
 
   depends_on = [acme_registration.registration]
-  /*
-  lifecycle {
-    prevent_destroy = true
-  }
-  */
 }
 
 
 /*
-
 # Uncomment if you want to use self-signed instead of ACME
-
 # Create a CA cert with the private key you just generated.
 resource "tls_self_signed_cert" "ca" {
   private_key_pem = tls_private_key.ca.private_key_pem
@@ -159,7 +152,7 @@ resource "google_compute_region_ssl_certificate" "main" {
   private_key = local.vault_key
 
   description = "The regional SSL certificate of the private load balancer for Vault."
-  name_prefix = "vault-"
+  name_prefix = "vault-${random_string.vault.result}"
 
   lifecycle {
     create_before_destroy = true

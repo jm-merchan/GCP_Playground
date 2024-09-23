@@ -9,7 +9,7 @@ locals {
     {
       crypto_key            = google_kms_crypto_key.vault_key.name
       key_ring              = google_kms_key_ring.key_ring.name
-      leader_tls_servername = "${var.cluster-name}-${var.region1}.${local.domain}"
+      leader_tls_servername = "${var.cluster-name}-${var.region1}-${random_string.vault.result}.${local.domain}"
       location              = var.location
       project               = var.project_id
       resource_name_prefix  = var.resource_name_prefix

@@ -23,11 +23,10 @@ data "terracurl_request" "vault_init" {
 }
 EOF
 
-  skip_tls_verify = true
   response_codes = [
     200,
     204,
-    400 # In case Vault is already inicialized
+    400 # In case Vault is already initialized
   ]
 }
 

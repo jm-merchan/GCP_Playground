@@ -5,7 +5,7 @@ locals {
 }
 
 resource "time_sleep" "wait_60_seconds" {
-  depends_on      = [google_compute_forwarding_rule.ext-lb2]
+  depends_on      = [google_compute_forwarding_rule.ext-lb2, acme_certificate.certificate]
   create_duration = "60s"
 }
 

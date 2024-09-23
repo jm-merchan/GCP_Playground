@@ -20,6 +20,10 @@ terraform {
       source  = "devops-rob/terracurl"
       version = "1.2.1"
     }
+    acme = {
+      source  = "vancluever/acme"
+      version = "2.26.0"
+    }
   }
 }
 

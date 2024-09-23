@@ -50,14 +50,4 @@ resource "google_secret_manager_secret_iam_member" "secret_manager_member" {
   member    = "serviceAccount:${google_service_account.main.email}"
 }
 
-resource "google_storage_bucket_iam_member" "member_object" {
-  bucket = google_storage_bucket_object.vault_license.bucket
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.main.email}"
-}
 
-resource "google_storage_bucket_iam_member" "member_bucket" {
-  bucket = google_storage_bucket_object.vault_license.bucket
-  role   = "roles/storage.legacyBucketReader"
-  member = "serviceAccount:${google_service_account.main.email}"
-}

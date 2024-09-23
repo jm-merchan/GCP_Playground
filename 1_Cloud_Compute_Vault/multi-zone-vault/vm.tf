@@ -7,21 +7,21 @@ data "google_compute_image" "debian" {
 locals {
   vault_user_data = templatefile("${path.module}/templates/install_vault.sh.tpl",
     {
-      crypto_key               = google_kms_crypto_key.vault_key.name
-      gcs_bucket_vault_license = google_storage_bucket.vault_license_bucket.name
-      key_ring                 = google_kms_key_ring.key_ring.name
-      leader_tls_servername    = var.shared_san
-      location                 = var.location
-      project                  = var.project_id
-      resource_name_prefix     = var.resource_name_prefix
-      tls_secret_id            = var.tls_secret_id
-      vault_license_name       = var.vault_license_name
-      vault_version            = var.vault_version
+      crypto_key            = google_kms_crypto_key.vault_key.name
+      key_ring              = google_kms_key_ring.key_ring.name
+      leader_tls_servername = "${var.cluster-name}-${var.region1}.${local.domain}"
+      location              = var.location
+      project               = var.project_id
+      resource_name_prefix  = var.resource_name_prefix
+      tls_secret_id         = var.tls_secret_id
+      vault_license         = var.vault_license
+      vault_version         = var.vault_version
     }
   )
 }
 
 resource "google_compute_instance_template" "vault" {
+  depends_on   = [acme_certificate.certificate]
   name_prefix  = "${var.resource_name_prefix}-vault"
   machine_type = var.machine_type
 

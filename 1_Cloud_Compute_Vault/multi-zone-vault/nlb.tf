@@ -15,7 +15,7 @@ resource "google_compute_address" "internal2" {
   subnetwork   = google_compute_subnetwork.subnet1.id
 }
 
-# Public Endpoitn for public load balancer
+# Public Endpoint for public load balancer
 resource "google_compute_address" "public" {
   name         = "${var.resource_name_prefix}-vault-public-lb"
   region       = var.region1
@@ -119,21 +119,13 @@ resource "google_compute_region_url_map" "lb" {
 
   description = "The URL map of the internal load balancer for Vault"
 }
-/*
-resource "google_compute_region_url_map" "lb-ext" {
-  default_service = google_compute_region_backend_service.lb-ext.self_link
-  name            = "${var.resource_name_prefix}-vault-external-lb"
-  region          = var.region1
 
-  description = "The URL map of the external load balancer for Vault"
-}
-*/
 data "google_dns_managed_zone" "env_dns_zone" {
   name = var.dns_zone_name_ext
 }
 # Create A record for External VIP
 resource "google_dns_record_set" "vip" {
-  name = "vault-${var.region1}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  name = "${var.cluster-name}-${var.region1}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
   ttl  = 300
 
@@ -141,13 +133,14 @@ resource "google_dns_record_set" "vip" {
   rrdatas      = [google_compute_address.public.address]
 }
 
-
-# Regional SSL Certificate with the content of the self-signed server previously created
+# Regional SSL Certificate with the content of the Let's Encrypt signed server previously created
 resource "google_compute_region_ssl_certificate" "vault_ssl_cert" {
-  name        = "${var.resource_name_prefix}-vault-ssl-cert"
-  region      = var.region1
-  private_key = tls_private_key.server.private_key_pem
-  certificate = tls_locally_signed_cert.server.cert_pem # Path to your certificate
+  name   = "${var.resource_name_prefix}-vault-ssl-cert"
+  region = var.region1
+  # private_key = tls_private_key.server.private_key_pem
+  private_key = local.vault_key
+  # certificate = tls_locally_signed_cert.server.cert_pem # Path to your certificate
+  certificate = local.vault_cert
 }
 
 # Frontend configuration for internal LB on port 8200

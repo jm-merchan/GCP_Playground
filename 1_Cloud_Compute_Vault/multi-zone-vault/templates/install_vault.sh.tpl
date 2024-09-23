@@ -30,7 +30,7 @@ sudo jq -r .vault_cert <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-c
 sudo jq -r .vault_ca <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-ca.pem
 sudo jq -r .vault_pk <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-key.pem
 
-sudo gsutil cp "gs://${gcs_bucket_vault_license}/${vault_license_name}" /opt/vault/vault.hclic
+sudo echo $vault_license > /opt/vault/vault.hclic
 # vault.hclic should be readable by the vault group only
 sudo chown root:vault /opt/vault/vault.hclic
 sudo chmod 0640 /opt/vault/vault.hclic
@@ -85,5 +85,5 @@ sudo systemctl start vault
 echo "Setup Vault profile"
 cat <<PROFILE | sudo tee /etc/profile.d/vault.sh
 export VAULT_ADDR="https://127.0.0.1:8200"
-export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
+export VAULT_SKIP_VERIFY="true"
 PROFILE

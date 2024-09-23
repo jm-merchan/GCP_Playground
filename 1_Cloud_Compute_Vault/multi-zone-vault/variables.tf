@@ -22,16 +22,18 @@ variable "subnet3-region1" {
 
 variable "subnet4-region1" {
   type        = string
-  description = "proxy-only"
+  description = "proxy-only subnet for EXTERNAL LOAD BALANCER"
   default     = "10.0.4.0/24"
 }
 
 variable "vpc_name" {
-  type = string
+  type        = string
+  description = "Name for VP"
 }
 
 variable "project_id" {
-  type = string
+  type        = string
+  description = "You GCP project ID"
 }
 
 variable "environment" {
@@ -40,33 +42,22 @@ variable "environment" {
 }
 
 variable "dns_zone_name_ext" {
-  type    = string
-  default = "doormat-useremail"
-
+  type        = string
+  default     = ""
+  description = "Name of the External DNS Zone that must be precreated in your project. This will help in creating your public Certs using ACME"
 }
 
 variable "tls_secret_id" {
   type        = string
   description = "Secret id/name given to the google secrets manager secret"
-  default     = "vault"
+  default     = "vault-secret"
 }
 
 variable "storage_location" {
   type        = string
   description = "The location of the storage bucket for the Vault license."
-  default     = "EU"
 }
 
-variable "vault_license_filepath" {
-  type        = string
-  description = "Filepath to location of Vault license file"
-}
-
-variable "vault_license_name" {
-  type        = string
-  description = "Filename for Vault license file"
-  default     = "vault.hclic"
-}
 
 variable "shared_san" {
   type        = string
@@ -96,9 +87,7 @@ variable "disk_type" {
 }
 
 variable "vault_version" {
-  type    = string
-  default = "1.17.5"
-
+  type = string
 }
 
 variable "vault_lb_health_check" {
@@ -114,11 +103,36 @@ variable "vault_lb_cluster_health_check" {
 
 variable "resource_name_prefix" {
   type    = string
-  default = "vm"
+  default = "vmdemo"
 }
 
 variable "dns_zone_name_int" {
   type    = string
   default = "lab.int."
+}
 
+variable "email" {
+  type = string
+}
+
+variable "cluster-name" {
+  type        = string
+  description = "Prefix to identify the vault cluster. This name will be used in the public DNS names and certificate"
+}
+
+variable "acme_prod" {
+  type        = bool
+  description = "Whether to use ACME prod url or not"
+  default     = false
+}
+
+locals {
+  acme_prod = var.acme_prod == true ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
+
+variable "vault_license" {
+  description = "Vault Enterprise License"
+  type        = string
+  default     = ""
+  sensitive   = true
 }

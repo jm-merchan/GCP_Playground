@@ -8,8 +8,9 @@ variable "region1" {
 }
 
 variable "subnet1-region1" {
-  type    = string
-  default = "10.0.1.0/24"
+  type        = string
+  description = "Subnet to deploy VMs and VIPs"
+  default     = "10.0.1.0/24"
 }
 variable "subnet2-region1" {
   type    = string
@@ -28,7 +29,7 @@ variable "subnet4-region1" {
 
 variable "vpc_name" {
   type        = string
-  description = "Name for VP"
+  description = "VPC Name"
 }
 
 variable "project_id" {
@@ -36,28 +37,17 @@ variable "project_id" {
   description = "You GCP project ID"
 }
 
-variable "environment" {
-  type    = string
-  default = "dev"
-}
 
 variable "dns_zone_name_ext" {
   type        = string
-  default     = ""
   description = "Name of the External DNS Zone that must be precreated in your project. This will help in creating your public Certs using ACME"
 }
 
 variable "tls_secret_id" {
   type        = string
   description = "Secret id/name given to the google secrets manager secret"
-  default     = "vault-secret"
+  default     = "vault-secret-demo"
 }
-
-variable "storage_location" {
-  type        = string
-  description = "The location of the storage bucket for the Vault license."
-}
-
 
 variable "shared_san" {
   type        = string
@@ -112,7 +102,8 @@ variable "dns_zone_name_int" {
 }
 
 variable "email" {
-  type = string
+  type        = string
+  description = "Email address to create Certs in ACME request"
 }
 
 variable "cluster-name" {
@@ -133,6 +124,5 @@ locals {
 variable "vault_license" {
   description = "Vault Enterprise License"
   type        = string
-  default     = ""
   sensitive   = true
 }

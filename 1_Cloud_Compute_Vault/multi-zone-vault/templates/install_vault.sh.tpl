@@ -30,7 +30,7 @@ sudo jq -r .vault_cert <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-c
 sudo jq -r .vault_ca <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-ca.pem
 sudo jq -r .vault_pk <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-key.pem
 
-sudo echo $vault_license > /opt/vault/vault.hclic
+sudo echo ${vault_license} > /opt/vault/vault.hclic
 # vault.hclic should be readable by the vault group only
 sudo chown root:vault /opt/vault/vault.hclic
 sudo chmod 0640 /opt/vault/vault.hclic

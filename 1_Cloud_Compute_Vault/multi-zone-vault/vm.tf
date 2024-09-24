@@ -5,7 +5,7 @@ data "google_compute_image" "debian" {
 }
 
 locals {
-  vault_version = var.vault_enterprise == false ? "vault=${var.vault_version}-*" : "vault-enterpirse=${var.vault_version}+ent-*"
+  vault_version = var.vault_enterprise == false ? "vault=${var.vault_version}-*" : "vault-enterprise=${var.vault_version}+ent-*"
 }
 
 
@@ -84,6 +84,11 @@ resource "google_compute_region_instance_group_manager" "vault" {
   named_port {
     name = "cluster"
     port = 8201
+  }
+
+  named_port {
+    name = "kmip"
+    port = 5696
   }
 
   version {

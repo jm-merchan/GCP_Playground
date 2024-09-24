@@ -40,7 +40,6 @@ resource "acme_certificate" "certificate" {
 
     config = {
       GCE_PROJECT = var.project_id
-      # GOOGLE_DNS_ZONE_NAME = data.google_dns_managed_zone.env_dns_zone.dns_name
     }
   }
 

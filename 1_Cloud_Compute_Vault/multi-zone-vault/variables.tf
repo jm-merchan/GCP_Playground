@@ -124,6 +124,7 @@ locals {
 variable "vault_license" {
   description = "Vault Enterprise License"
   type        = string
+  default = "empty"
   sensitive   = true
 }
 
@@ -142,5 +143,10 @@ variable "vault_enterprise" {
   description = "Whether using Vault Enterprise or not"
   type        = bool
   default     = true
+}
 
+variable "kmip_enable" {
+  description = "Enable kmip loadbalancer. Requires Vault Enterprise"
+  type = bool
+  default = false
 }

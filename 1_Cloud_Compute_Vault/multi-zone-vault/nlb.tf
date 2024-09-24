@@ -115,6 +115,27 @@ resource "google_compute_region_backend_service" "lb-ext-cluster" {
   }
 }
 
+# External Backend for Vault on port 5696
+resource "google_compute_region_backend_service" "lb-ext-kmip" {
+  health_checks         = [google_compute_region_health_check.lb.self_link]
+  name                  = "${var.resource_name_prefix}-vault-external-lb-kmip-${random_string.vault.result}"
+  region                = var.region1
+  description           = "The backend service of the external load balancer for Vault on port 5696"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  port_name             = "kmip" 
+  protocol              = "TCP"
+  timeout_sec           = 10
+  session_affinity      = "CLIENT_IP"
+  locality_lb_policy    = "RING_HASH"
+
+  backend {
+    group           = google_compute_region_instance_group_manager.vault.instance_group
+    balancing_mode  = "UTILIZATION"
+    description     = "The instance group of the compute deployment for Vault"
+    capacity_scaler = 1.0
+  }
+}
+
 
 resource "google_compute_region_url_map" "lb" {
   default_service = google_compute_region_backend_service.lb.self_link
@@ -191,6 +212,14 @@ resource "google_compute_region_target_tcp_proxy" "ext-lb-cluster" {
   description     = "The target TCP proxy of the external load balancer for Vault cluster port"
 }
 
+# Frontend configuration for external LB on port 5696
+resource "google_compute_region_target_tcp_proxy" "ext-lb-kmip" {
+  name            = "${var.resource_name_prefix}-vault-external-lb-kmip-${var.region1}-${random_string.vault.result}"
+  region          = var.region1
+  backend_service = google_compute_region_backend_service.lb-ext-kmip.id
+  description     = "The target TCP proxy of the external load balancer for Vault kmip port"
+}
+
 
 # Port 443 route for internal load balancer with HTTPS interception
 resource "google_compute_forwarding_rule" "lb1" {
@@ -254,4 +283,16 @@ resource "google_compute_forwarding_rule" "ext-lb3" {
   port_range            = 8201
   network               = google_compute_network.global_vpc.id
   target                = google_compute_region_target_tcp_proxy.ext-lb-cluster.id
+}
+
+# Port 5696  route for external load balancer 
+resource "google_compute_forwarding_rule" "ext-lb4" {
+  name                  = "${var.resource_name_prefix}-vault-external-kmip-${random_string.vault.result}"
+  region                = var.region1
+  ip_address            = google_compute_address.public.address
+  ip_protocol           = "TCP"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  port_range            = 5696
+  network               = google_compute_network.global_vpc.id
+  target                = google_compute_region_target_tcp_proxy.ext-lb-kmip.id
 }

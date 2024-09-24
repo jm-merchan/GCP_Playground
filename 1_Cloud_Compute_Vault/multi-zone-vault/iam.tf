@@ -45,10 +45,26 @@ resource "google_project_iam_custom_role" "secret_creator" {
   ]
 }
 
+# Role for automatic snapshot and sa json retrival
+resource "google_project_iam_custom_role" "keys" {
+  role_id     = "vaultkeys${random_string.vault.result}"
+  title       = "vault-akeys-${random_string.vault.result}"
+  description = "Custom role for Vault auto snapshot with json credential"
+  permissions = [
+    "iam.serviceAccountKeys.create"
+  ]
+}
+
 resource "google_project_iam_member" "vault_secret" {
   member  = "serviceAccount:${google_service_account.main.email}"
   project = var.project_id
   role    = google_project_iam_custom_role.secret_creator.name
+}
+
+resource "google_project_iam_member" "vault_keys" {
+  member  = "serviceAccount:${google_service_account.main.email}"
+  project = var.project_id
+  role    = google_project_iam_custom_role.keys.name
 }
 
 

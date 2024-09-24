@@ -131,6 +131,7 @@ variable "vault_license" {
 variable "allowed_networks" {
   description = "CIDR range allowed to connect to Vault from Internet"
   type        = string
+  default     = "0.0.0.0/0"
 }
 
 variable "networking_healthcheck_ips" {
@@ -155,4 +156,11 @@ variable "vault_log_path" {
   description = "Path to store Vault logs. Logrotate and Ops Agent are configured to operate with logs in this path"
   type        = string
   default     = "/var/log/vault.log"
+}
+
+variable "storage_location" {
+  description = "The Geo to store the snapshots"
+  type        = string
+  default     = "EU"
+
 }

@@ -51,6 +51,7 @@ resource "google_compute_instance_template" "vault" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.subnet1.self_link
+    # Uncomment to provide with Public IPs
     /*
     access_config {
 

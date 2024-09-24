@@ -1,6 +1,6 @@
 locals {
-  fqdn_ext = substr(google_dns_record_set.vip.name, 0, length(google_dns_record_set.vip.name) - 1)
-  fqdn_int443 = substr(google_dns_record_set.vip-int1.name, 0, length(google_dns_record_set.vip-int1.name) - 1)
+  fqdn_ext     = substr(google_dns_record_set.vip.name, 0, length(google_dns_record_set.vip.name) - 1)
+  fqdn_int443  = substr(google_dns_record_set.vip-int1.name, 0, length(google_dns_record_set.vip-int1.name) - 1)
   fqdn_int8200 = substr(google_dns_record_set.vip-int2.name, 0, length(google_dns_record_set.vip-int2.name) - 1)
 }
 

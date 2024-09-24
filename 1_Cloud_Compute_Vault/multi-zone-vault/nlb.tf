@@ -61,6 +61,8 @@ resource "google_compute_region_backend_service" "lb" {
   port_name             = "https"
   protocol              = "HTTPS"
   timeout_sec           = 10
+  session_affinity      = "CLIENT_IP"
+  locality_lb_policy    = "RING_HASH"
 
   backend {
     group = google_compute_region_instance_group_manager.vault.instance_group
@@ -81,6 +83,8 @@ resource "google_compute_region_backend_service" "lb-ext-api" {
   port_name             = "https"
   protocol              = "TCP"
   timeout_sec           = 10
+  session_affinity      = "CLIENT_IP"
+  locality_lb_policy    = "RING_HASH"
 
   backend {
     group           = google_compute_region_instance_group_manager.vault.instance_group
@@ -100,6 +104,8 @@ resource "google_compute_region_backend_service" "lb-ext-cluster" {
   port_name             = "cluster" # The port 8201 as defined in the MIG, should be changed to variable
   protocol              = "TCP"
   timeout_sec           = 10
+  session_affinity      = "CLIENT_IP"
+  locality_lb_policy    = "RING_HASH"
 
   backend {
     group           = google_compute_region_instance_group_manager.vault.instance_group

@@ -130,6 +130,25 @@ resource "google_dns_record_set" "vip" {
   rrdatas      = [google_compute_address.public.address]
 }
 
+# Create A record for Internal VIPs
+resource "google_dns_record_set" "vip-int1" {
+  name = "vip443-${random_string.vault.result}.${google_dns_managed_zone.private-zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = google_dns_managed_zone.private-zone.name
+  rrdatas      = [google_compute_address.internal.address]
+}
+
+resource "google_dns_record_set" "vip-int2" {
+  name = "vip8200-${random_string.vault.result}.${google_dns_managed_zone.private-zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = google_dns_managed_zone.private-zone.name
+  rrdatas      = [google_compute_address.internal2.address]
+}
+
 # Regional SSL Certificate with the content of the Let's Encrypt signed server previously created
 resource "google_compute_region_ssl_certificate" "vault_ssl_cert" {
   name   = "${var.resource_name_prefix}-vault-ssl-cert-${random_string.vault.result}"

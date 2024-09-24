@@ -148,7 +148,7 @@ resource "google_compute_firewall" "ssh" {
 
   description   = "The firewall which allows the ingress of SSH traffic to Vault instances"
   direction     = "INGRESS"
-  source_ranges = [var.allowed_networks]
+  source_ranges = ["0.0.0.0/0"]
   target_tags   = ["${var.resource_name_prefix}-vault"]
 
   allow {

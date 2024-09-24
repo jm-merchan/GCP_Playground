@@ -8,7 +8,7 @@ export local_ipv4="$(curl -s http://metadata.google.internal/computeMetadata/v1/
 
 wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-sudo apt update && sudo apt install -y vault-enterprise=${vault_version}+ent-* jq
+sudo apt update && sudo apt install -y ${vault_version} jq
 
 echo "Configuring system time"
 timedatectl set-timezone UTC

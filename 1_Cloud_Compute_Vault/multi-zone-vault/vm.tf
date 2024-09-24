@@ -5,6 +5,11 @@ data "google_compute_image" "debian" {
 }
 
 locals {
+  vault_version = var.vault_enterprise == false ? "vault=${var.vault_version}-*" : "vault-enterpirse=${var.vault_version}+ent-*"
+}
+
+
+locals {
   vault_user_data = templatefile("${path.module}/templates/install_vault.sh.tpl",
     {
       crypto_key            = google_kms_crypto_key.vault_key.name
@@ -15,7 +20,7 @@ locals {
       resource_name_prefix  = var.resource_name_prefix
       tls_secret_id         = var.tls_secret_id
       vault_license         = var.vault_license
-      vault_version         = var.vault_version
+      vault_version         = local.vault_version
     }
   )
 }

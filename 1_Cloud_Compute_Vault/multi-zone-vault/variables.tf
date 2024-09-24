@@ -126,3 +126,21 @@ variable "vault_license" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_networks" {
+  description = "CIDR range allowed to connect to Vault from Internet"
+  type        = string
+}
+
+variable "networking_healthcheck_ips" {
+  description = "GCP Health Check IPs: https://cloud.google.com/load-balancing/docs/health-check-concepts?hl=es-419"
+  type        = list(any)
+  default     = ["35.191.0.0/16", "130.211.0.0/22"]
+}
+
+variable "vault_enterprise" {
+  description = "Whether using Vault Enterprise or not"
+  type        = bool
+  default     = true
+
+}

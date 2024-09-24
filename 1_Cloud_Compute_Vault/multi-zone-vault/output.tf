@@ -19,3 +19,14 @@ output "pri_fqdn_443" {
 output "pri_fqdn_8200" {
   value = "https://${local.fqdn_int8200}:8200"
 }
+/*
+#Print the data needed
+output "public_ips" {
+  value = [
+    for instance in data.google_compute_instance.intance_data :
+    [
+      instance.name, instance.network_interface.0.access_config.0.nat_ip
+    ]
+  ]
+}
+*/

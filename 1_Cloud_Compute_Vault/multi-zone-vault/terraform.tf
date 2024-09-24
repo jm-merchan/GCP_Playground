@@ -16,9 +16,9 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.3"
     }
-    terracurl = {
-      source  = "devops-rob/terracurl"
-      version = "1.2.1"
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.3"
     }
     acme = {
       source  = "vancluever/acme"

@@ -32,15 +32,23 @@ resource "google_project_iam_custom_role" "kms_role" {
 }
 
 
-# Role for log injection
-resource "google_project_iam_custom_role" "log_injector_role" {
+# Role to create secrets with root token
+resource "google_project_iam_custom_role" "secret_creator" {
   role_id     = "vaultlog${random_string.vault.result}"
   title       = "vault-log-${random_string.vault.result}"
-  description = "Custom role for Vault audit log injection"
+  description = "Custom role for Vault secret creation"
   permissions = [
-    "logging.logEntries.create",
-    "logging.logEntries.route",
+    "secretmanager.secrets.create",
+    "secretmanager.secrets.get",
+    "secretmanager.versions.add",
+    "secretmanager.versions.access"
   ]
+}
+
+resource "google_project_iam_member" "vault_secret" {
+  member  = "serviceAccount:${google_service_account.main.email}"
+  project = var.project_id
+  role    = google_project_iam_custom_role.secret_creator.name
 }
 
 
@@ -69,4 +77,9 @@ resource "google_secret_manager_secret_iam_member" "secret_manager_member" {
   member    = "serviceAccount:${google_service_account.main.email}"
 }
 
+resource "google_project_iam_member" "logging" {
+  member  = "serviceAccount:${google_service_account.main.email}"
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+}
 

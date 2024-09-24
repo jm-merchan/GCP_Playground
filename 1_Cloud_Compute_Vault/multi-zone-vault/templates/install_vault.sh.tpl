@@ -120,7 +120,7 @@ metrics:
   receivers:
     vault:
       type: vault
-      token: $VAULT_TOKEN
+      token: VAULT_TOKEN_PROMETHEUS
       endpoint: 127.0.0.1:8200
       insecure_skip_verify: true
       insecure: false
@@ -139,7 +139,6 @@ logging:
     pipelines:
       vault_pipeline:
         receivers: [vault_audit_logs]
-}
 
 EOF
 
@@ -149,3 +148,10 @@ sudo systemctl restart google-cloud-ops-agent
 sudo touch /var/log/vault.log
 sudo chown vault:vault /var/log/vault.log
 # sudo chown vault:vault /var/log
+
+# Adding the prometheus monitoring policy
+sudo cat << EOF > /opt/vault/prometheus.hcl
+  path "/sys/metrics" {
+  capabilities = ["read"]
+  }
+EOF

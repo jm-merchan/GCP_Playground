@@ -42,7 +42,8 @@ resource "google_compute_subnetwork" "subnet3" {
 
 # Proxy only subnet
 resource "google_compute_subnetwork" "proxy_only_subnet" {
-  name          = "${var.region1}-subnet4-${random_string.vault.result}"
+  # name          = "${var.region1}-subnet4-${random_string.vault.result}"
+  name          = "${var.resource_name_prefix}-subnet4-${random_string.vault.result}"
   ip_cidr_range = var.subnet4-region1
   region        = var.region1
   network       = google_compute_network.global_vpc.id
@@ -68,87 +69,90 @@ resource "google_compute_router_nat" "custom_nat" {
 }
 
 
-resource "google_compute_firewall" "allow_vault_api" {
-  name    = "allow-vault-api-${random_string.vault.result}"
+# Allow traffic from designated network segments to VMS
+resource "google_compute_firewall" "allow_vault_all_external" {
+  name    = "allow-vault-all-${random_string.vault.result}"
   network = google_compute_network.global_vpc.id
-
-  allow { 
+  allow {
     protocol = "tcp"
     ports = [
       "8200",
       "8201",
-      "22"
     ]
   }
-
-  source_ranges = ["0.0.0.0/0"] # Allow from any IP (internet)
-
-  target_tags = ["${var.resource_name_prefix}-vault"] # Apply this rule to VMs with the '${var.resource_name_prefix}-vault' tag
+  source_ranges = [var.allowed_networks] # Allow from defined CIDR range
+  target_tags   = ["${var.resource_name_prefix}-vault"]
+  direction     = "INGRESS"
 }
 
+# Rule to allow all outbound traffic 
 resource "google_compute_firewall" "allow_vault_outbound" {
-  name    = "allow-vault-outbound-${random_string.vault.result}"
-  network = google_compute_network.global_vpc.id
-
+  name        = "allow-vault-outbound-${random_string.vault.result}"
+  network     = google_compute_network.global_vpc.id
+  description = "Rule to allow all outbound traffic"
   allow { # Allow ports for HTTP (80) and HTTPS (443)
     protocol = "tcp"
   }
   direction          = "EGRESS"
   destination_ranges = ["0.0.0.0/0"] # Allow from any IP (internet)
-
-  # source_tags = ["${var.resource_name_prefix}-vault"]  # Apply this rule to VMs with the '${var.resource_name_prefix}-vault' tag
+  # source_tags = ["${var.resource_name_prefix}-vault"]
 }
 
+# Rule to allow traffic between cluster nodes
 resource "google_compute_firewall" "allow_internal" {
-  name    = "${var.resource_name_prefix}-vault-allow-internal-${random_string.vault.result}"
-  network = google_compute_network.global_vpc.id
-
+  name        = "${var.resource_name_prefix}-vault-allow-internal-${random_string.vault.result}"
+  network     = google_compute_network.global_vpc.id
+  description = "Rule to allow traffic between cluster nodes on API and Cluster ports and PING"
   allow {
     protocol = "tcp"
     ports    = ["8200", "8201"]
+  }
+  allow {
+    protocol = "icmp"
   }
   source_tags = ["${var.resource_name_prefix}-vault"]
   target_tags = ["${var.resource_name_prefix}-vault"]
 }
 
+# Rule to allow traffic from internal subnets to Vault api
 resource "google_compute_firewall" "lb_proxy" {
   name          = "${var.resource_name_prefix}-proxy-firewall-${random_string.vault.result}"
   network       = google_compute_network.global_vpc.self_link
-  source_ranges = [var.subnet1-region1, var.subnet2-region1, var.subnet3-region1]
-
-  target_service_accounts = [google_service_account.main.email]
-
-  allow {
-    protocol = "tcp"
-    ports    = ["8200", "443"]
-  }
-}
-
-resource "google_compute_firewall" "lb_healthchecks" {
-  name    = "${var.resource_name_prefix}-lb-healthcheck-firewall-${random_string.vault.result}"
-  network = google_compute_network.global_vpc.self_link
-  # source_ranges = var.networking_healthcheck_ips
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = [var.subnet1-region1, var.subnet2-region1, var.subnet3-region1, var.subnet4-region1]
+  description   = "Rule to allow traffic from internal subnets to Vault api"
   target_tags   = ["${var.resource_name_prefix}-vault"]
 
   allow {
     protocol = "tcp"
-    ports    = ["8200"]
+    ports    = ["8200", "8201"]
   }
 }
 
+# Allow traffic from Health Checks
+resource "google_compute_firewall" "lb_healthchecks" {
+  name          = "${var.resource_name_prefix}-lb-healthcheck-firewall-${random_string.vault.result}"
+  network       = google_compute_network.global_vpc.self_link
+  source_ranges = var.networking_healthcheck_ips
+  target_tags   = ["${var.resource_name_prefix}-vault"]
+  description   = "Allow Healthcheck to Vault"
+
+  allow {
+    protocol = "tcp"
+  }
+}
+
+# Allow SSH from my IP to Vault Public IPs
 resource "google_compute_firewall" "ssh" {
   name    = "${var.resource_name_prefix}-ssh-firewall-${random_string.vault.result}"
   network = google_compute_network.global_vpc.self_link
 
   description   = "The firewall which allows the ingress of SSH traffic to Vault instances"
   direction     = "INGRESS"
-  source_ranges = ["0.0.0.0/0"]
-
-  target_tags = ["${var.resource_name_prefix}-vault"]
+  source_ranges = [var.allowed_networks]
+  target_tags   = ["${var.resource_name_prefix}-vault"]
 
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
-}
+} 

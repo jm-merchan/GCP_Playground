@@ -8,7 +8,7 @@ resource "time_sleep" "wait_60_seconds" {
 data "terracurl_request" "vault_init" {
   depends_on   = [time_sleep.wait_60_seconds]
   name         = "init"
-  url          = "https://${local.fqdn}/v1/sys/init"
+  url          = "https://${local.fqdn_ext}/v1/sys/init"
   method       = "PUT"
   request_body = <<EOF
 {

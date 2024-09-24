@@ -124,7 +124,7 @@ locals {
 variable "vault_license" {
   description = "Vault Enterprise License"
   type        = string
-  default = "empty"
+  default     = "empty"
   sensitive   = true
 }
 
@@ -147,6 +147,24 @@ variable "vault_enterprise" {
 
 variable "kmip_enable" {
   description = "Enable kmip loadbalancer. Requires Vault Enterprise"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
+}
+
+variable "vault_log_path" {
+  description = "Path to store Vault logs. Logrotate and Ops Agent are configured to operate with logs in this path"
+  type        = string
+  default     = "/var/log/vault.log"
+}
+
+variable "gce_ssh_user" {
+  description = "SSH username"
+  type = string
+  
+}
+
+variable "gce_ssh_pub_key_file" {
+  description = "SSH Public key to access to Vault"
+  type = string
+  
 }

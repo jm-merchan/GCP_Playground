@@ -2,7 +2,7 @@
 # Service Account for Vault to auto-unseal and auto-join
 resource "google_service_account" "main" {
   account_id   = "iam-vault-${random_string.vault.result}"
-  display_name = "Vault KMS and auto-join for auto-unseal"
+  display_name = "Vault KMS for auto-unseal Auto-join Snapshots and Logs"
 }
 
 # Role for autojoin has list permissions
@@ -31,6 +31,19 @@ resource "google_project_iam_custom_role" "kms_role" {
   ]
 }
 
+
+# Role for log injection
+resource "google_project_iam_custom_role" "log_injector_role" {
+  role_id     = "vaultlog${random_string.vault.result}"
+  title       = "vault-log-${random_string.vault.result}"
+  description = "Custom role for Vault audit log injection"
+  permissions = [
+    "logging.logEntries.create",
+    "logging.logEntries.route",
+  ]
+}
+
+
 resource "google_kms_key_ring_iam_binding" "vault_iam_kms_binding" {
   key_ring_id = google_kms_key_ring.key_ring.id
   role        = google_project_iam_custom_role.kms_role.name
@@ -42,6 +55,12 @@ resource "google_project_iam_member" "vault_auto_join" {
   member  = "serviceAccount:${google_service_account.main.email}"
   project = var.project_id
   role    = google_project_iam_custom_role.autojoin_role.name
+}
+
+resource "google_project_iam_member" "vault_log" {
+  member  = "serviceAccount:${google_service_account.main.email}"
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_manager_member" {

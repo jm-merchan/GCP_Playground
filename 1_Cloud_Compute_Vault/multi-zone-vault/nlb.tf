@@ -117,12 +117,13 @@ resource "google_compute_region_backend_service" "lb-ext-cluster" {
 
 # External Backend for Vault on port 5696
 resource "google_compute_region_backend_service" "lb-ext-kmip" {
+  count = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
   health_checks         = [google_compute_region_health_check.lb.self_link]
   name                  = "${var.resource_name_prefix}-vault-external-lb-kmip-${random_string.vault.result}"
   region                = var.region1
   description           = "The backend service of the external load balancer for Vault on port 5696"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  port_name             = "kmip" 
+  port_name             = "kmip"
   protocol              = "TCP"
   timeout_sec           = 10
   session_affinity      = "CLIENT_IP"
@@ -214,9 +215,10 @@ resource "google_compute_region_target_tcp_proxy" "ext-lb-cluster" {
 
 # Frontend configuration for external LB on port 5696
 resource "google_compute_region_target_tcp_proxy" "ext-lb-kmip" {
+  count = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
   name            = "${var.resource_name_prefix}-vault-external-lb-kmip-${var.region1}-${random_string.vault.result}"
   region          = var.region1
-  backend_service = google_compute_region_backend_service.lb-ext-kmip.id
+  backend_service = google_compute_region_backend_service.lb-ext-kmip[count.index].id
   description     = "The target TCP proxy of the external load balancer for Vault kmip port"
 }
 
@@ -287,6 +289,7 @@ resource "google_compute_forwarding_rule" "ext-lb3" {
 
 # Port 5696  route for external load balancer 
 resource "google_compute_forwarding_rule" "ext-lb4" {
+  count = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
   name                  = "${var.resource_name_prefix}-vault-external-kmip-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.public.address
@@ -294,5 +297,5 @@ resource "google_compute_forwarding_rule" "ext-lb4" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = 5696
   network               = google_compute_network.global_vpc.id
-  target                = google_compute_region_target_tcp_proxy.ext-lb-kmip.id
+  target                = google_compute_region_target_tcp_proxy.ext-lb-kmip[count.index].id
 }

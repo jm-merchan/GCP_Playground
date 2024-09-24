@@ -8,7 +8,12 @@ export local_ipv4="$(curl -s http://metadata.google.internal/computeMetadata/v1/
 
 wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-sudo apt update && sudo apt install -y ${vault_version} jq
+sudo apt update && sudo apt install -y ${vault_version} jq logrotate
+
+# Install Ops Agent
+curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+sudo bash add-google-cloud-ops-agent-repo.sh --also-install
+
 
 echo "Configuring system time"
 timedatectl set-timezone UTC
@@ -72,6 +77,12 @@ seal "gcpckms" {
 
 license_path = "/opt/vault/vault.hclic"
 
+# https://cloud.google.com/monitoring/agent/ops-agent/third-party/vault?hl=es-419
+telemetry {
+  prometheus_retention_time = "10m"
+  disable_hostname = false
+}
+
 EOF
 
 # vault.hcl should be readable by the vault group only
@@ -87,3 +98,54 @@ cat <<PROFILE | sudo tee /etc/profile.d/vault.sh
 export VAULT_ADDR="https://127.0.0.1:8200"
 export VAULT_SKIP_VERIFY="true"
 PROFILE
+
+
+# Create log rotate configuration
+sudo cat << EOF > /etc/logrotate.d/vault
+${vault_log_path} {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}
+
+EOF
+
+# Create Ops Agent configuration for Vault
+sudo cat << EOF > /etc/google-cloud-ops-agent/config.yaml
+metrics:
+  receivers:
+    vault:
+      type: vault
+      token: $VAULT_TOKEN
+      endpoint: 127.0.0.1:8200
+      insecure_skip_verify: true
+      insecure: false
+  service:
+    pipelines:
+      vault:
+        receivers:
+          - vault
+logging:
+  receivers:
+    vault_audit_logs:
+      type: files
+      include_paths:
+        - ${vault_log_path}
+  service:
+    pipelines:
+      vault_pipeline:
+        receivers: [vault_audit_logs]
+}
+
+EOF
+
+sudo systemctl restart google-cloud-ops-agent
+
+# Add permissions to vault user to write logs
+sudo touch /var/log/vault.log
+sudo chown vault:vault /var/log/vault.log
+# sudo chown vault:vault /var/log

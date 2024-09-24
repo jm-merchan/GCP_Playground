@@ -21,6 +21,7 @@ locals {
       tls_secret_id         = var.tls_secret_id
       vault_license         = var.vault_license
       vault_version         = local.vault_version
+      vault_log_path        = var.vault_log_path
     }
   )
 }
@@ -33,6 +34,10 @@ resource "google_compute_instance_template" "vault" {
   tags = ["${var.resource_name_prefix}-vault"]
 
   metadata_startup_script = local.vault_user_data
+
+  metadata = {
+    "ssh-keys" = "${var.gce_ssh_user}:${var.gce_ssh_pub_key_file}"
+  }
 
   disk {
     source_image = data.google_compute_image.debian.self_link

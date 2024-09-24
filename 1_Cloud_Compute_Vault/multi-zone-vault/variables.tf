@@ -156,19 +156,3 @@ variable "vault_log_path" {
   type        = string
   default     = "/var/log/vault.log"
 }
-
-variable "gce_ssh_user" {
-  description = "SSH username"
-  type = string
-  
-}
-
-variable "gce_ssh_pub_key_file" {
-  description = "SSH Public key to access to Vault"
-  type = string
-}
-
-variable "gce_ssh_priv_key_file" {
-  description = "SSH Private key to access Vault instances via SSH"
-  type = string
-}

@@ -88,7 +88,7 @@ resource "google_project_iam_member" "vault_log" {
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_manager_member" {
-  secret_id = var.tls_secret_id
+  secret_id = "${var.tls_secret_id}-${random_string.vault.result}"
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.main.email}"
 }

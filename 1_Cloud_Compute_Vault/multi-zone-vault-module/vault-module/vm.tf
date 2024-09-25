@@ -17,8 +17,8 @@ locals {
       leader_tls_servername = "${var.cluster-name}-${var.region1}-${random_string.vault.result}.${local.domain}"
       location              = var.location
       project               = var.project_id
-      resource_name_prefix  = var.resource_name_prefix
-      tls_secret_id         = var.tls_secret_id
+      resource_name         = "${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"
+      tls_secret_id         = "${var.tls_secret_id}-${random_string.vault.result}"
       vault_license         = var.vault_license
       vault_version         = local.vault_version
       vault_log_path        = var.vault_log_path
@@ -28,10 +28,10 @@ locals {
 
 resource "google_compute_instance_template" "vault" {
   depends_on   = [acme_certificate.certificate]
-  name_prefix  = "${var.resource_name_prefix}-vault"
+  name_prefix  = "${var.resource_name_prefix}-vault-${random_string.vault.result}"
   machine_type = var.machine_type
 
-  tags = ["${var.resource_name_prefix}-vault"]
+  tags = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
 
   metadata_startup_script = local.vault_user_data
 

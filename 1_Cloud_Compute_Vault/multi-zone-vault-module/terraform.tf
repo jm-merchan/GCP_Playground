@@ -1,9 +1,11 @@
 terraform {
   required_providers {
+    
     google = {
       source  = "hashicorp/google"
       version = "6.3.0"
     }
+    /*
     time = {
       source  = "hashicorp/time"
       version = "0.12.1"
@@ -20,6 +22,7 @@ terraform {
       source  = "hashicorp/null"
       version = "3.2.3"
     }
+    */
     acme = {
       source  = "vancluever/acme"
       version = "2.26.0"
@@ -33,9 +36,11 @@ provider "google" {
   project = var.project_id
 }
 
+/*
 provider "google-beta" {
   project = var.project_id
 }
+*/
 
 provider "acme" {
   server_url = local.acme_prod

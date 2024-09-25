@@ -11,3 +11,5 @@ There are other changes are listed below:
 * Cluster Port Layer-4 load-balancer
 * KMIP Layer-4 load-balancer
 * Steps to initialize Vault and save the root token and recovery keys as GCP Secret.
+
+There is an issue with the usage of MIG and an stateful app as Vault. MIG are designed for stateless apps and so things like getting the IPs of the managed instance required of a set of data sources, as described in this [issue](https://github.com/hashicorp/terraform-provider-google/issues/1246). We can tacke it by having separate Terraform code that does the initialization as a second apply. Othere posibilitty could be to place the Prometheus scrappers outside of the Vault host VMs. However for simplicity everything is placed inside. The side effect of this is that if a Vault VM is recreated, the Prometheus configuration of the Ops Agent will have to be re-applied, since the script template does not uses a proper Vault token.

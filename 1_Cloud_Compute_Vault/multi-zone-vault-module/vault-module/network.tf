@@ -81,7 +81,7 @@ resource "google_compute_firewall" "allow_vault_all_external" {
     ]
   }
   source_ranges = [var.allowed_networks] # Allow from defined CIDR range
-  target_tags   = ["${var.resource_name_prefix}-vault"]
+  target_tags   = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
   direction     = "INGRESS"
 }
 
@@ -95,7 +95,7 @@ resource "google_compute_firewall" "allow_vault_outbound" {
   }
   direction          = "EGRESS"
   destination_ranges = ["0.0.0.0/0"] # Allow from any IP (internet)
-  # source_tags = ["${var.resource_name_prefix}-vault"]
+  # source_tags = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
 }
 
 # Rule to allow traffic between cluster nodes
@@ -110,8 +110,8 @@ resource "google_compute_firewall" "allow_internal" {
   allow {
     protocol = "icmp"
   }
-  source_tags = ["${var.resource_name_prefix}-vault"]
-  target_tags = ["${var.resource_name_prefix}-vault"]
+  source_tags = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
+  target_tags = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
 }
 
 # Rule to allow traffic from internal subnets to Vault api
@@ -120,7 +120,7 @@ resource "google_compute_firewall" "lb_proxy" {
   network       = google_compute_network.global_vpc.self_link
   source_ranges = [var.subnet1-region1, var.subnet2-region1, var.subnet3-region1, var.subnet4-region1]
   description   = "Rule to allow traffic from internal subnets to Vault api"
-  target_tags   = ["${var.resource_name_prefix}-vault"]
+  target_tags   = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
 
   allow {
     protocol = "tcp"
@@ -133,7 +133,7 @@ resource "google_compute_firewall" "lb_healthchecks" {
   name          = "${var.resource_name_prefix}-lb-healthcheck-firewall-${random_string.vault.result}"
   network       = google_compute_network.global_vpc.self_link
   source_ranges = var.networking_healthcheck_ips
-  target_tags   = ["${var.resource_name_prefix}-vault"]
+  target_tags   = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
   description   = "Allow Healthcheck to Vault"
 
   allow {
@@ -149,7 +149,7 @@ resource "google_compute_firewall" "ssh" {
   description   = "The firewall which allows the ingress of SSH traffic to Vault instances"
   direction     = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["${var.resource_name_prefix}-vault"]
+  target_tags   = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
 
   allow {
     protocol = "tcp"

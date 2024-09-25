@@ -49,7 +49,7 @@ storage "raft" {
   path    = "/opt/vault/data"
   node_id = "$instance_id"
   retry_join {
-    auto_join               = "provider=gce tag_value=${resource_name_prefix}-vault"
+    auto_join               = "provider=gce tag_value=${resource_name}"
     auto_join_scheme        = "https"
     leader_tls_servername   = "${leader_tls_servername}"
     leader_ca_cert_file     = "/opt/vault/tls/vault-ca.pem"

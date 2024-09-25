@@ -96,10 +96,10 @@ resource "google_compute_region_instance_group_manager" "vault" {
   }
 
   version {
-    name = google_compute_instance_template.vault.name
+    name              = google_compute_instance_template.vault.name
     instance_template = google_compute_instance_template.vault.self_link
   }
-    update_policy {
+  update_policy {
     type = "OPPORTUNISTIC"
     //type                         = "PROACTIVE"
     instance_redistribution_type = "PROACTIVE"

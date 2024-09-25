@@ -1,10 +1,16 @@
 terraform {
   required_providers {
-    
+
     google = {
       source  = "hashicorp/google"
       version = "6.3.0"
     }
+
+    acme = {
+      source  = "vancluever/acme"
+      version = "2.26.0"
+    }
+
     /*
     time = {
       source  = "hashicorp/time"
@@ -23,13 +29,8 @@ terraform {
       version = "3.2.3"
     }
     */
-    acme = {
-      source  = "vancluever/acme"
-      version = "2.26.0"
-    }
   }
 }
-
 
 
 provider "google" {

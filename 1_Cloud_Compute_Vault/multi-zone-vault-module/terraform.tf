@@ -48,7 +48,7 @@ provider "acme" {
   # server_url = "https://acme-v02.api.letsencrypt.org/directory" # Production
 }
 
-module "vault" {
+module "vault1" {
   source               = "./vault-module"
   dns_zone_name_ext    = var.dns_zone_name_ext
   project_id           = var.project_id

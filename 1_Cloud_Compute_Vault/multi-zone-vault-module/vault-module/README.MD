@@ -4,7 +4,7 @@ The reference module created a number of Vault instances within a single-zone ma
 
 There are other changes are listed below:
 
-* et's encrypt generated certificate for Vault (with option to use production or staging CA).
+* Let's encrypt generated certificate for Vault (with option to use production or staging CA).
 * Inclusiong of Google Ops Agent in the VM to capture both audit logs and Promethus metrics. Part of the agent metric scrapping settings must be set "manually" after VM instances have been provisioned, as the Ops Agent required a Vault token to access a certain path within the API.
 * Inclusion of log-rotate to rotate Vault audit logs.
 * Steps to enable automatic snapshots

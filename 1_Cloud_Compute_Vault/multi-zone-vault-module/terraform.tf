@@ -49,7 +49,7 @@ provider "acme" {
 }
 
 module "vault1" {
-  source               = "./vault-module"
+  source               = "./terraform-google-vaultcluster"
   dns_zone_name_ext    = var.dns_zone_name_ext
   project_id           = var.project_id
   vpc_name             = var.vpc_name
@@ -69,7 +69,7 @@ module "vault1" {
 }
 
 module "vault2" {
-  source               = "./vault-module"
+  source               = "./terraform-google-vaultcluster"
   dns_zone_name_ext    = var.dns_zone_name_ext
   project_id           = var.project_id
   vpc_name             = var.vpc_name

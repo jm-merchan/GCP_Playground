@@ -61,11 +61,12 @@ cluster_addr = "https://$local_ipv4:8201"
 api_addr = "https://$local_ipv4:8200"
 
 listener "tcp" {
-  address            = "0.0.0.0:8200"
-  tls_disable        = false
-  tls_cert_file      = "/opt/vault/tls/vault-cert.pem"
-  tls_key_file       = "/opt/vault/tls/vault-key.pem"
-  tls_client_ca_file = "/opt/vault/tls/vault-ca.pem"
+  address                           = "0.0.0.0:8200"
+  tls_disable                       = false
+  tls_cert_file                     = "/opt/vault/tls/vault-cert.pem"
+  tls_key_file                      = "/opt/vault/tls/vault-key.pem"
+  tls_client_ca_file                = "/opt/vault/tls/vault-ca.pem"
+  x_forwarded_for_authorized_addrs  = "0.0.0.0/0"
 }
 
 seal "gcpckms" {
@@ -154,4 +155,5 @@ sudo cat << EOF > /opt/vault/prometheus.hcl
   path "/sys/metrics" {
   capabilities = ["read"]
   }
+  
 EOF

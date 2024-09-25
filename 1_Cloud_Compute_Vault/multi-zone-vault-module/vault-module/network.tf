@@ -6,7 +6,7 @@ resource "google_compute_network" "global_vpc" {
 
 # Create DNS Zone private
 resource "google_dns_managed_zone" "private-zone" {
-  name        = "private-zone"
+  name        = "private-zone-${var.region1}-${random_string.vault.result}"
   dns_name    = var.dns_zone_name_int
   description = "Example private DNS zone"
 

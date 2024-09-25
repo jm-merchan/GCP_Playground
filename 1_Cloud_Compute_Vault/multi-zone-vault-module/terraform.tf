@@ -62,3 +62,23 @@ module "vault" {
   kmip_enable          = true
   storage_location     = var.storage_location
 }
+
+module "vault2" {
+  source               = "./vault-module"
+  dns_zone_name_ext    = var.dns_zone_name_ext
+  project_id           = var.project_id
+  vpc_name             = var.vpc_name
+  region1              = var.region1
+  location             = var.location
+  machine_type         = var.machine_type
+  vault_version        = var.vault_version
+  resource_name_prefix = "demo2"
+  email                = var.email
+  cluster-name         = "vault-eu-secondary"
+  vault_license        = var.vault_license
+  node_count           = var.node_count
+  allowed_networks     = var.allowed_networks
+  vault_enterprise     = true
+  kmip_enable          = true
+  storage_location     = var.storage_location
+}

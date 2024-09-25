@@ -46,7 +46,7 @@ variable "dns_zone_name_ext" {
 variable "tls_secret_id" {
   type        = string
   description = "Secret id/name given to the google secrets manager secret"
-  default     = "vault-secret-demo"
+  default     = "vault-and-lb-certificate"
 }
 
 variable "shared_san" {

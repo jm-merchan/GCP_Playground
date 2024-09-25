@@ -151,7 +151,7 @@ resource "google_compute_region_ssl_certificate" "main" {
 }
 
 resource "google_secret_manager_secret" "secret_tls" {
-  secret_id = var.tls_secret_id
+  secret_id = "${var.tls_secret_id}-${random_string.vault.result}"
 
   replication {
     auto {}

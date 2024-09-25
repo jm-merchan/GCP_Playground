@@ -34,6 +34,9 @@ secret_result=$(gcloud secrets versions access latest --secret=${tls_secret_id})
 sudo jq -r .vault_cert <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-cert.pem
 sudo jq -r .vault_ca <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-ca.pem
 sudo jq -r .vault_pk <<< "$secret_result" | base64 -d > /opt/vault/tls/vault-key.pem
+# Add intermediate to cert chain
+sudo echo -e "\n" >> /opt/vault/tls/vault-cert.pem
+sudo jq -r .vault_ca <<< "$secret_result" | base64 -d >>  /opt/vault/tls/vault-cert.pem
 
 sudo echo ${vault_license} > /opt/vault/vault.hclic
 # vault.hclic should be readable by the vault group only

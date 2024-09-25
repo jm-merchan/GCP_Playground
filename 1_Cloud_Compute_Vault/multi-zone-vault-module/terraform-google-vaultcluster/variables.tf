@@ -82,7 +82,7 @@ variable "vault_version" {
 
 variable "vault_lb_health_check" {
   type    = string
-  default = "/v1/sys/health?activecode=200&standbycode=200&sealedcode=200&uninitcode=200"
+  default = "/v1/sys/health?activecode=200&standbycode=200&performancestandbycode=200&drsecondarycode=200"
 
 }
 

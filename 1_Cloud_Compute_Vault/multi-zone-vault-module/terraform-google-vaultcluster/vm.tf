@@ -96,6 +96,15 @@ resource "google_compute_region_instance_group_manager" "vault" {
   }
 
   version {
+    name = google_compute_instance_template.vault.name
     instance_template = google_compute_instance_template.vault.self_link
+  }
+    update_policy {
+    type = "OPPORTUNISTIC"
+    //type                         = "PROACTIVE"
+    instance_redistribution_type = "PROACTIVE"
+    minimal_action               = "REPLACE"
+    max_surge_fixed              = length(data.google_compute_zones.available.names)
+    max_unavailable_fixed        = 0
   }
 }

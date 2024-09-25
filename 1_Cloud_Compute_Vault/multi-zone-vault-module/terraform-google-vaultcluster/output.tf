@@ -33,7 +33,6 @@ output "init_script_node1" {
   value = <<EOF
 
 # Initialize Vault
-
 vault operator init -format=json > output.json
 cat output.json | jq -r .root_token > root.token
 export VAULT_TOKEN=$(cat root.token)
@@ -91,9 +90,12 @@ VAULT_ADDR=https://${local.fqdn_ext}:8200 vault write sys/storage/raft/snapshot-
 
 output "init_remote" {
   value = <<EOF
-  # Initialize Vault
+# Initialize Vault
 export VAULT_ADDR=https://${local.fqdn_ext}:8200
 export SKIP_TLS_VERIFY=true
+vault status
+curl -k $VAULT_ADDR
+
 vault operator init -format=json > output.json
 cat output.json | jq -r .root_token > root.token
 export VAULT_TOKEN=$(cat root.token)
@@ -116,6 +118,6 @@ vault operator raft autopilot set-config -cleanup-dead-servers=true -dead-server
 # Enable automatic snapshot
 gcloud iam service-accounts keys create sa-keys__${var.region1}_${random_string.vault.result}.json --iam-account=${google_service_account.main.email}
 vault write sys/storage/raft/snapshot-auto/config/hourly interval="1h" retain=10 path_prefix="snapshots/" storage_type=google-gcs google_gcs_bucket=${google_storage_bucket.vault_license_bucket.name} google_service_account_key="@sa-keys__${var.region1}_${random_string.vault.result}.json"
-
+rm sa-keys__${var.region1}_${random_string.vault.result}.json
   EOF
 }

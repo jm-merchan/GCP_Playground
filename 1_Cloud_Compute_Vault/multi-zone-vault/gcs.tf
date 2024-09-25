@@ -21,11 +21,3 @@ resource "google_storage_bucket_iam_member" "member_object" {
   role   = "roles/storage.objectUser"
   member = "serviceAccount:${google_service_account.main.email}"
 }
-
-/*
-resource "google_storage_bucket_iam_member" "member_bucket" {
-  bucket = google_storage_bucket_object.vault_license.bucket
-  role   = "roles/storage.legacyBucketReader"
-  member = "serviceAccount:${google_service_account.main.email}"
-}
-*/

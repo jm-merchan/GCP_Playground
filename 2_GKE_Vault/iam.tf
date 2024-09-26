@@ -11,7 +11,8 @@ resource "google_project_iam_custom_role" "kms_role" {
     "cloudkms.cryptoKeys.get",
     "cloudkms.locations.get",
     "cloudkms.locations.list",
-    "resourcemanager.projects.get"
+    "resourcemanager.projects.get",
+    "iam.serviceAccounts.getAccessToken" # For workload identity
   ]
 }
 
@@ -29,15 +30,7 @@ resource "google_project_iam_member" "vault_kms" {
 }
 
 resource "google_project_iam_member" "workload_identity-role" {
-    project = var.project_id
-    role    = google_project_iam_custom_role.kms_role.name
-    member  = "serviceAccount:${var.project_id}.svc.id.goog[${kubernetes_namespace.vault.metadata[0].name}/${var.cluster-name}]"
-}
-
-/*
-resource "google_project_iam_member" "vault_kms_sa" {
-  member  = "serviceAccount:${var.project_id}.svc.id.goog"
   project = var.project_id
   role    = google_project_iam_custom_role.kms_role.name
+  member  = "serviceAccount:${var.project_id}.svc.id.goog[${kubernetes_namespace.vault.metadata[0].name}/${var.cluster-name}]"
 }
-*/

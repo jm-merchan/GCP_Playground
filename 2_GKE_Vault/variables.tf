@@ -128,3 +128,9 @@ variable "node_count" {
   default = 3
 }
 
+variable "storage_location" {
+  description = "The Geo to store the snapshots"
+  type        = string
+  default     = "EU"
+
+}

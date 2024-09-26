@@ -27,12 +27,37 @@ resource "kubernetes_secret" "license_secret" {
     namespace = kubernetes_namespace.vault.metadata[0].name
   }
 
-  data = {
+  binary_data = {
     license = base64encode(var.vault_license)
 
   }
 }
 
+/*
+# Config map for extra container with log-rotate
+resource "kubernetes_config_map" "log-rotate" {
+  metadata {
+    name      = "logrotate-config"
+    namespace = kubernetes_namespace.vault.metadata[0].name
+  }
+
+  data = {
+    "logrotate.conf" = <<EOF
+        /vault/audit/vault.log {
+        rotate 2
+        size 1M
+        missingok
+        compress
+
+        postrotate
+            pkill -HUP vault
+        endscript
+    }
+
+    EOF
+  }
+}
+*/
 
 
 locals {
@@ -55,10 +80,13 @@ locals {
   )
 }
 
-
+# Deploy Vault Enterprise
 resource "helm_release" "vault_enterprise" {
-  count     = var.vault_enterprise ? 1 : 0
-  depends_on = [ google_project_iam_member.vault_kms ]
+  count = var.vault_enterprise ? 1 : 0
+  depends_on = [
+    google_project_iam_member.vault_kms,
+    # kubernetes_config_map.log-rotate
+  ]
   name      = var.cluster-name
   namespace = kubernetes_namespace.vault.metadata[0].name
   chart     = "hashicorp/vault"
@@ -67,3 +95,18 @@ resource "helm_release" "vault_enterprise" {
   values = [local.vault_user_data_ent]
 
 }
+
+
+
+
+/*
+output "vault_lb_8200_internal" {
+    description = "The internal loadbalancer ip address for port 8200 balancing across all nodes"
+    value = data.kubernetes_service.vault_lb_8200.status[0].load_balancer[0].ingress[0].ip
+}
+
+output "vault_lb_8201_internal" {
+    description = "The internal loadbalancer ip address for port 8201 balancing pointing to active node"
+    value = data.kubernetes_service.vault_lb_8201.status[0].load_balancer[0].ingress[0].ip
+}
+*/

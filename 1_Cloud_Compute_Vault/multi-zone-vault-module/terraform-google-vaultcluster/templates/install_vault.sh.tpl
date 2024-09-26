@@ -85,6 +85,7 @@ license_path = "/opt/vault/vault.hclic"
 telemetry {
   prometheus_retention_time = "10m"
   disable_hostname = false
+  unauthenticated_metrics_access = "true"
 }
 
 EOF

@@ -65,3 +65,43 @@ resource "google_compute_router_nat" "custom_nat" {
   nat_ip_allocate_option             = "AUTO_ONLY"                     # Google will automatically allocate IPs for NAT
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES" # Allow all internal VMs to use this NAT for outbound traffic
 }
+
+# Getting details for vault active
+data "kubernetes_service" "vault_lb_8201" {
+  depends_on = [ helm_release.vault_enterprise ]
+  metadata {
+    name      = "${var.cluster-name}-active"                           # Name of the service created by Helm
+    namespace = kubernetes_namespace.vault.metadata[0].name # Namespace where the Helm chart deployed the service
+  }
+}
+
+# Getting details for vault service
+data "kubernetes_service" "vault_lb_8200" {
+  depends_on = [ helm_release.vault_enterprise ]
+  metadata {
+    name      = var.cluster-name                            # Name of the service created by Helm
+    namespace = kubernetes_namespace.vault.metadata[0].name # Namespace where the Helm chart deployed the service
+  }
+}
+
+# Create A record for External VIP
+resource "google_dns_record_set" "vip" {
+  name = "${var.cluster-name}-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = data.google_dns_managed_zone.env_dns_zone.name
+  rrdatas      = [data.kubernetes_service.vault_lb_8200.status[0].load_balancer[0].ingress[0].ip]
+  # rrdatas = [google_compute_address.public.address]
+}
+
+# Create A record for External VIP API
+resource "google_dns_record_set" "vip_cluster_port" {
+  name = "${var.cluster-name}-clusterport-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = data.google_dns_managed_zone.env_dns_zone.name
+  rrdatas      = [data.kubernetes_service.vault_lb_8201.status[0].load_balancer[0].ingress[0].ip]
+  # rrdatas = [google_compute_address.public.address]
+}

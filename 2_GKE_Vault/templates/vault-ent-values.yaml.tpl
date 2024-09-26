@@ -1,7 +1,6 @@
 global:
    enabled: true
    tlsDisable: false 
-
 injector:
    enabled: true
    image:
@@ -14,6 +13,14 @@ logLevel: "trace" # Set to trace for initial troubleshooting, info for normal op
 
 server:
 # config.yaml
+   service:
+      # https://cloud.google.com/kubernetes-engine/docs/concepts/service-load-balancer-parameters
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      annotations:
+         cloud.google.com/load-balancer-type: "External"
+         # networking.gke.io/load-balancer-ip-addresses: _static_ip_
+         # cloud.google.com/l4-rbs: "enabled"
    image:
       repository: docker.io/hashicorp/vault-enterprise
       tag: ${vault_version}
@@ -23,22 +30,28 @@ server:
       VAULT_CACERT: /vault/userconfig/vault-ha-tls/vault.ca
       VAULT_TLSCERT: /vault/userconfig/vault-ha-tls/vault.crt
       VAULT_TLSKEY: /vault/userconfig/vault-ha-tls/vault.key
+      VAULT_SKIP_VERIFY: true  #THE ACME CERT DOES NOT INCLUDE 127.0.0.1 on its SAN so to avoid issues using the cli client adding this env
    volumes:
       - name: userconfig-vault-ha-tls
         secret:
          defaultMode: 420
          secretName: vault-ha-tls
+      - name: logrotate-config
+        configMap:
+          name: logrotate-config
    volumeMounts:
       - mountPath: /vault/userconfig/vault-ha-tls
         name: userconfig-vault-ha-tls
         readOnly: true
    standalone:
       enabled: false
-   # affinity: "" #No affinity rules so I can install 3 vault instances in a single
    serviceAccount:
       create: true
       annotations: |
-         iam.gke.io/gcp-service-account: ${service_account}
+         iam.gke.io/gcp-service-account: ${service_account}  # map vault sa to iam service account
+   #auditStorage:
+   #   enabled: true
+   # affinity: "" #No affinity rules so I can install 3 vault instances in a single
    affinity: |
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -50,7 +63,7 @@ server:
             topologyKey: kubernetes.io/hostname
    ha:
       enabled: true
-      replicas: 3
+      replicas: ${number_nodes}
       raft:
          enabled: true
          setNodeId: true
@@ -72,7 +85,7 @@ server:
                   auto_join             = "provider=k8s namespace=${namespace} label_selector=\"component=server,app.kubernetes.io/name={{ template "vault.name" . }}\""
                   auto_join_scheme      = "https"
                   leader_ca_cert_file   = "/vault/userconfig/vault-ha-tls/vault.ca"
-                  leader_tls_servername = "${leader_tls_servername}" #Tiene que matchear una SAN del certificado
+                  leader_tls_servername = "${leader_tls_servername}"
                }
             
             }
@@ -87,12 +100,30 @@ server:
             telemetry {
                disable_hostname = true
                prometheus_retention_time = "12h"
+               unauthenticated_metrics_access = "true"
             }
             disable_mlock = true
             service_registration "kubernetes" {}
-      # Vault UI
+   
+   # Vault UI
    ui:
       enabled: true
-      serviceType: "LoadBalancer"
-      serviceNodePort: null
-      externalPort: 8200
+   
+   # HUP signal for logrotate
+   # shareProcessNamespace: true
+ 
+   # And finally the container
+   #extraContainers:
+   #  - name: auditlog-rotator
+   #    image: josemerchan/vault-logrotate:0.0.1
+   #    imagePullPolicy: Always
+   #    env:
+   #      - name: CRONTAB
+   #        value: "*/5 * * * *"
+   #    volumeMounts:
+   #      - mountPath: /etc/logrotate.conf
+   #        name: logrotate-config
+   #        subPath: logrotate.conf
+   #        readOnly: true
+   #      - mountPath: /vault/audit
+   #        name: audit

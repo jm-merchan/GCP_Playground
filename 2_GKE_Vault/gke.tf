@@ -30,17 +30,17 @@ resource "google_container_cluster" "default" {
 
   # IMPORTANT required to enable workload identity
   workload_identity_config {
-      workload_pool = "${data.google_client_config.default.project}.svc.id.goog"
-    }
+    workload_pool = "${data.google_client_config.default.project}.svc.id.goog"
+  }
 }
 
-
+/*
 resource "google_service_account" "default" {
   account_id   = "service-account-gke-${random_string.vault.result}"
   display_name = "Service Account for GKE Node Pool"
 }
 
-/*
+
 # Uncomment to enable node pool
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   count            = var.gke_autopilot_enable ? 0 : 1

@@ -64,7 +64,7 @@ rm root.token
 
 # Enable Audit Logging
 vault audit enable file file_path=/vault/audit/vault.log -path=localfile/
-# vault audit enable file file_path=stdout -path=stdout/
+vault audit enable -path=stdout file file_path=stdout
 
 # Enable Dead Server clean-up, min-quorum should be set in accordance to cluster size
 vault operator raft autopilot set-config -cleanup-dead-servers=true -dead-server-last-contact-threshold=1m -min-quorum=3
@@ -101,6 +101,7 @@ rm root.token
 
 # Enable Audit Logging
 vault audit enable file file_path=/vault/audit/vault.log -path=localfile/
+vault audit enable -path=stdout file file_path=stdout
 # ===========================
 # ---------------------------
   EOF

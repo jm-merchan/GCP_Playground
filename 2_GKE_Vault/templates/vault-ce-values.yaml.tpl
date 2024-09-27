@@ -23,10 +23,8 @@ server:
          # networking.gke.io/load-balancer-ip-addresses: _static_ip_
          # cloud.google.com/l4-rbs: "enabled"
    image:
-      repository: docker.io/hashicorp/vault-enterprise
+      repository: docker.io/hashicorp/vault
       tag: ${vault_version}
-   enterpriseLicense:
-      secretName: vault-ent-license
    extraEnvironmentVars:
       VAULT_CACERT: /vault/userconfig/vault-ha-tls/vault.ca
       VAULT_TLSCERT: /vault/userconfig/vault-ha-tls/vault.crt

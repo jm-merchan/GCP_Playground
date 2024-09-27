@@ -16,7 +16,7 @@ resource "google_container_cluster" "default" {
 
   network            = local.network
   subnetwork         = local.subnetwork
-  initial_node_count = var.node_count
+  initial_node_count = 1
 
   ip_allocation_policy {
     stack_type                    = "IPV4"
@@ -34,8 +34,9 @@ resource "google_container_cluster" "default" {
   }
 }
 
-/*
+
 resource "google_service_account" "default" {
+  count        = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
   account_id   = "service-account-gke-${random_string.vault.result}"
   display_name = "Service Account for GKE Node Pool"
 }
@@ -43,20 +44,20 @@ resource "google_service_account" "default" {
 
 # Uncomment to enable node pool
 resource "google_container_node_pool" "primary_preemptible_nodes" {
-  count            = var.gke_autopilot_enable ? 0 : 1
+  count      = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
   name       = "${var.region}-node-pool-${random_string.vault.result}"
   location   = var.region
   cluster    = google_container_cluster.default.name
   node_count = 3
-  
+
 
   node_config {
     preemptible  = true
     machine_type = var.machine_type
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    service_account = google_service_account.default.email
-    oauth_scopes    = [
+    service_account = google_service_account.default[0].email
+    oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
     workload_metadata_config {
@@ -64,4 +65,3 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     }
   }
 }
-*/

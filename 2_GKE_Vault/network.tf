@@ -68,23 +68,32 @@ resource "google_compute_router_nat" "custom_nat" {
 
 # Getting details for vault active
 data "kubernetes_service" "vault_lb_8201" {
-  depends_on = [ helm_release.vault_enterprise ]
+  depends_on = [helm_release.vault_enterprise, helm_release.vault_community]
   metadata {
-    name      = "${var.cluster-name}-active"                           # Name of the service created by Helm
+    name      = "${var.cluster-name}-active"                # Name of the service created by Helm
     namespace = kubernetes_namespace.vault.metadata[0].name # Namespace where the Helm chart deployed the service
   }
 }
 
 # Getting details for vault service
 data "kubernetes_service" "vault_lb_8200" {
-  depends_on = [ helm_release.vault_enterprise ]
+  depends_on = [helm_release.vault_enterprise, helm_release.vault_community]
   metadata {
     name      = var.cluster-name                            # Name of the service created by Helm
     namespace = kubernetes_namespace.vault.metadata[0].name # Namespace where the Helm chart deployed the service
   }
 }
 
-# Create A record for External VIP
+# Getting details for kmip service
+data "kubernetes_service" "vault_lb_5696" {
+  depends_on = [helm_release.vault_enterprise, kubernetes_service.kmip]
+  metadata {
+    name      = "${var.cluster-name}-kmip"                  # Name of the service created by Helm
+    namespace = kubernetes_namespace.vault.metadata[0].name # Namespace where the Helm chart deployed the service
+  }
+}
+
+# Create A record for External VIP API/UI
 resource "google_dns_record_set" "vip" {
   name = "${var.cluster-name}-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
@@ -95,7 +104,7 @@ resource "google_dns_record_set" "vip" {
   # rrdatas = [google_compute_address.public.address]
 }
 
-# Create A record for External VIP API
+# Create A record for External VIP CLUSTER PORT
 resource "google_dns_record_set" "vip_cluster_port" {
   name = "${var.cluster-name}-clusterport-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
@@ -103,5 +112,17 @@ resource "google_dns_record_set" "vip_cluster_port" {
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.vault_lb_8201.status[0].load_balancer[0].ingress[0].ip]
+  # rrdatas = [google_compute_address.public.address]
+}
+
+# Create A record for External VIP KMIP
+resource "google_dns_record_set" "vip_kmip" {
+  count = (var.kmip_enable && var.vault_enterprise) ? 1 : 0
+  name  = "${var.cluster-name}-${var.region}-kmip-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  type  = "A"
+  ttl   = 300
+
+  managed_zone = data.google_dns_managed_zone.env_dns_zone.name
+  rrdatas      = [data.kubernetes_service.vault_lb_5696.status[0].load_balancer[0].ingress[0].ip]
   # rrdatas = [google_compute_address.public.address]
 }

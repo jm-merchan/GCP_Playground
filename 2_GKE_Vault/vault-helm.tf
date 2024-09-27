@@ -33,7 +33,53 @@ resource "kubernetes_secret" "license_secret" {
   }
 }
 
-/*
+# Create KMIP loadbalancer
+resource "kubernetes_service" "kmip" {
+  depends_on = [helm_release.vault_enterprise]
+  count      = (var.kmip_enable && var.vault_enterprise) ? 1 : 0
+  metadata {
+    name      = "${var.cluster-name}-kmip"
+    namespace = kubernetes_namespace.vault.metadata[0].name
+
+    labels = {
+      "app.kubernetes.io/instance" = var.cluster-name
+      "app.kubernetes.io/name"     = "vault"
+    }
+
+    annotations = {
+      "cloud.google.com/load-balancer-type" = "External"
+      "meta.helm.sh/release-name"           = var.cluster-name
+      "meta.helm.sh/release-namespace"      = kubernetes_namespace.vault.metadata[0].name
+    }
+
+  }
+
+  spec {
+    port {
+      name        = "kmip"
+      protocol    = "TCP"
+      port        = 5696
+      target_port = 5696
+    }
+
+    selector = {
+      "app.kubernetes.io/instance" = var.cluster-name
+      "app.kubernetes.io/name"     = "vault"
+      component                    = "server"
+    }
+
+    type                              = "LoadBalancer"
+    session_affinity                  = "ClientIP"
+    external_traffic_policy           = "Local"
+    publish_not_ready_addresses       = true
+    ip_families                       = ["IPv4"]
+    ip_family_policy                  = "SingleStack"
+    allocate_load_balancer_node_ports = true
+    internal_traffic_policy           = "Cluster"
+  }
+}
+
+
 # Config map for extra container with log-rotate
 resource "kubernetes_config_map" "log-rotate" {
   metadata {
@@ -57,8 +103,6 @@ resource "kubernetes_config_map" "log-rotate" {
     EOF
   }
 }
-*/
-
 
 locals {
   # Templating Enterprise Yaml
@@ -74,9 +118,20 @@ locals {
       number_nodes          = var.node_count
       namespace             = kubernetes_namespace.vault.metadata[0].name
       service_account       = google_service_account.service_account.email
-    }
+    })
     # Templating CE Yaml
-
+  vault_user_data_ce = templatefile("${path.module}/templates/vault-ce-values.yaml.tpl",
+    {
+      crypto_key            = google_kms_crypto_key.vault_key.name
+      key_ring              = google_kms_key_ring.key_ring.name
+      leader_tls_servername = "${var.cluster-name}-${var.region}-${random_string.vault.result}.${local.domain}"
+      location              = var.location
+      project               = var.project_id
+      vault_version         = local.vault_version
+      number_nodes          = var.node_count
+      namespace             = kubernetes_namespace.vault.metadata[0].name
+      service_account       = google_service_account.service_account.email
+    }
   )
 }
 
@@ -85,28 +140,25 @@ resource "helm_release" "vault_enterprise" {
   count = var.vault_enterprise ? 1 : 0
   depends_on = [
     google_project_iam_member.vault_kms,
-    # kubernetes_config_map.log-rotate
+    kubernetes_config_map.log-rotate
   ]
   name      = var.cluster-name
   namespace = kubernetes_namespace.vault.metadata[0].name
   chart     = "hashicorp/vault"
   version   = var.vault_helm_release
-
   values = [local.vault_user_data_ent]
-
 }
 
-
-
-
-/*
-output "vault_lb_8200_internal" {
-    description = "The internal loadbalancer ip address for port 8200 balancing across all nodes"
-    value = data.kubernetes_service.vault_lb_8200.status[0].load_balancer[0].ingress[0].ip
+# Deploy Vault Community
+resource "helm_release" "vault_community" {
+  count = var.vault_enterprise ? 0 : 1
+  depends_on = [
+    google_project_iam_member.vault_kms,
+    kubernetes_config_map.log-rotate
+  ]
+  name      = var.cluster-name
+  namespace = kubernetes_namespace.vault.metadata[0].name
+  chart     = "hashicorp/vault"
+  version   = var.vault_helm_release
+  values = [local.vault_user_data_ce]
 }
-
-output "vault_lb_8201_internal" {
-    description = "The internal loadbalancer ip address for port 8201 balancing pointing to active node"
-    value = data.kubernetes_service.vault_lb_8201.status[0].load_balancer[0].ingress[0].ip
-}
-*/

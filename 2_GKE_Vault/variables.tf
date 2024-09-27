@@ -60,11 +60,13 @@ variable "gke_autopilot_enable" {
 }
 
 variable "machine_type" {
+  description = "Machine type"
   type    = string
   default = "e2-medium"
 }
 
 variable "vault_version" {
+  description = "Vault version expressed as X{n}.X{1,n}.X{1,n}, for example 1.16.3"
   type = string
 }
 
@@ -86,7 +88,7 @@ variable "kmip_enable" {
 }
 
 variable "vault_license" {
-  description = "Vault Enterprise License"
+  description = "Vault Enterprise License as string"
   type        = string
   default     = "empty"
   sensitive   = true
@@ -98,7 +100,7 @@ locals {
 
 variable "acme_prod" {
   type        = bool
-  description = "Whether to use ACME prod url or not"
+  description = "Whether to use ACME prod url or staging one. The staging certificate will not be trusted by default"
   default     = false
 }
 
@@ -120,11 +122,12 @@ variable "k8s_namespace" {
 variable "vault_helm_release" {
   type        = string
   description = "Helm release for Vault"
-  # default = "0.28.1"
+  default     = "0.28.1"
 }
 
 variable "node_count" {
   type    = number
+  description = "Number of Vault instances. Typically 3 or 5"
   default = 3
 }
 
@@ -133,4 +136,10 @@ variable "storage_location" {
   type        = string
   default     = "EU"
 
+}
+
+variable "with_node_pool" {
+  description = "Whether to use node pools. It does not apply when autopilot is used"
+  type        = bool
+  default     = false
 }

@@ -6,7 +6,6 @@ variable "create_network" {
 variable "vpc_name" {
   type        = string
   description = "Name of VPC to be created. The actual number will be randomize with a random suffix"
-  default     = ""
 }
 
 variable "vpc_reference" {

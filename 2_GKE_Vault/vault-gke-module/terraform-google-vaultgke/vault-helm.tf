@@ -140,7 +140,9 @@ resource "helm_release" "vault_enterprise" {
   count = var.vault_enterprise ? 1 : 0
   depends_on = [
     google_project_iam_member.vault_kms,
-    kubernetes_config_map.log-rotate
+    kubernetes_config_map.log-rotate,
+    acme_certificate.certificate,
+    kubernetes_secret.tls_secret 
   ]
   name      = var.cluster-name
   namespace = kubernetes_namespace.vault.metadata[0].name
@@ -154,7 +156,9 @@ resource "helm_release" "vault_community" {
   count = var.vault_enterprise ? 0 : 1
   depends_on = [
     google_project_iam_member.vault_kms,
-    kubernetes_config_map.log-rotate
+    kubernetes_config_map.log-rotate,
+    acme_certificate.certificate,
+    kubernetes_secret.tls_secret 
   ]
   name      = var.cluster-name
   namespace = kubernetes_namespace.vault.metadata[0].name

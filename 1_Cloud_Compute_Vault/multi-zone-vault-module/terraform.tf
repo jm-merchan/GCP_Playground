@@ -54,24 +54,24 @@ resource "google_compute_network" "vpc" {
 
 # Proxy only subnet
 resource "google_compute_subnetwork" "proxy_only_subnet" {
-  name          = "${var.region1}-proxy-only-${random_string.vault.result}"
+  name          = "${var.region1}-proxy-only-${random_string.string.result}"
   ip_cidr_range = var.subnet4-region1
   region        = var.region1
-  network       = google_compute_network.global_vpc.id 
+  network       = google_compute_network.vpc.id 
   purpose       = "REGIONAL_MANAGED_PROXY"
   role          = "ACTIVE"
 }
 
 # Create a Cloud Router
 resource "google_compute_router" "custom_router" {
-  name    = "${var.region1}-custom-router-${random_string.vault.result}"
+  name    = "${var.region1}-custom-router-${random_string.string.result}"
   region  = var.region1
-  network =google_compute_network.global_vpc.id 
+  network =google_compute_network.vpc.id 
 }
 
 # Configure Cloud NAT on the Cloud Router
 resource "google_compute_router_nat" "custom_nat" {
-  name   = "${var.region1}-custom-nat-${random_string.vault.result}"
+  name   = "${var.region1}-custom-nat-${random_string.string.result}"
   router = google_compute_router.custom_router.name
   region = google_compute_router.custom_router.region
 

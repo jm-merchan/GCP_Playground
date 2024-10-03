@@ -11,7 +11,6 @@ resource "google_compute_network" "global_vpc" {
   count                    = var.create_vpc ? 1 : 0
   name                     = "${var.region}-${var.vpc_name}-${random_string.vault.result}"
   auto_create_subnetworks  = false # Disable default subnets
-  enable_ula_internal_ipv6 = true  # as in https://cloud.google.com/kubernetes-engine/docs/quickstarts/create-cluster-using-terraform?hl=es-419
 }
 
 # Create subnets in a given region
@@ -20,8 +19,6 @@ resource "google_compute_subnetwork" "subnet1" {
   ip_cidr_range = var.subnet1-region
   region        = var.region
   network       = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
-  # stack_type       = "IPV4_IPV6"
-  # ipv6_access_type = "EXTERNAL"
 
   secondary_ip_range {
     range_name    = "services-range"
@@ -48,7 +45,7 @@ resource "google_compute_subnetwork" "proxy_only_subnet" {
 
 # Create a Cloud Router
 resource "google_compute_router" "custom_router" {
-  count  = var.create_vpc ? 1 : 0
+  count   = var.create_vpc ? 1 : 0
   name    = "${var.region}-custom-router-${random_string.vault.result}"
   region  = var.region
   network = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
@@ -56,6 +53,7 @@ resource "google_compute_router" "custom_router" {
 
 # Configure Cloud NAT on the Cloud Router
 resource "google_compute_router_nat" "custom_nat" {
+  count  = var.create_vpc ? 1 : 0
   name   = "${var.region}-custom-nat-${random_string.vault.result}"
   router = google_compute_router.custom_router[0].name
   region = google_compute_router.custom_router[0].region

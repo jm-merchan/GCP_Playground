@@ -70,6 +70,7 @@ listener "tcp" {
   tls_key_file                      = "/opt/vault/tls/vault-key.pem"
   tls_client_ca_file                = "/opt/vault/tls/vault-ca.pem"
   x_forwarded_for_authorized_addrs  = "0.0.0.0/0"
+  tls_disable_client_certs          = true
 }
 
 seal "gcpckms" {

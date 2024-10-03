@@ -23,7 +23,7 @@ output "cluster1_gcs_bucket_snapshot" {
 output "cluster1_init_remote" {
   value = module.vault1.init_remote
 }
-
+/*
 # Outputs for cluster2
 output "cluster2_fqdn_8200" {
   value = module.vault2.fqdn_8200
@@ -48,3 +48,4 @@ output "cluster2_gcs_bucket_snapshot" {
 output "cluster2_init_remote" {
   value = module.vault2.init_remote
 }
+*/

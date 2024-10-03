@@ -8,19 +8,18 @@ resource "random_string" "vault" {
 
 # Create a global VPC if required
 resource "google_compute_network" "global_vpc" {
-  count                    = var.create_network ? 1 : 0
-  name                     = "${var.vpc_name}-${random_string.vault.result}"
+  count                    = var.create_vpc ? 1 : 0
+  name                     = "${var.region}-${var.vpc_name}-${random_string.vault.result}"
   auto_create_subnetworks  = false # Disable default subnets
   enable_ula_internal_ipv6 = true  # as in https://cloud.google.com/kubernetes-engine/docs/quickstarts/create-cluster-using-terraform?hl=es-419
 }
 
 # Create subnets in a given region
 resource "google_compute_subnetwork" "subnet1" {
-  count         = var.create_network ? 1 : 0
   name          = "${var.region}-subnet1-${random_string.vault.result}"
   ip_cidr_range = var.subnet1-region
   region        = var.region
-  network       = google_compute_network.global_vpc[0].id
+  network       = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   # stack_type       = "IPV4_IPV6"
   # ipv6_access_type = "EXTERNAL"
 
@@ -38,26 +37,25 @@ resource "google_compute_subnetwork" "subnet1" {
 
 # Proxy only subnet
 resource "google_compute_subnetwork" "proxy_only_subnet" {
-  count         = var.create_network ? 1 : 0
+  count  = var.create_vpc ? 1 : 0
   name          = "${var.region}-proxyonly-${random_string.vault.result}"
   ip_cidr_range = var.subnet2-region
   region        = var.region
-  network       = google_compute_network.global_vpc[0].id
+  network       = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   purpose       = "REGIONAL_MANAGED_PROXY"
   role          = "ACTIVE"
 }
 
 # Create a Cloud Router
 resource "google_compute_router" "custom_router" {
-  count   = var.create_network ? 1 : 0
+  count  = var.create_vpc ? 1 : 0
   name    = "${var.region}-custom-router-${random_string.vault.result}"
   region  = var.region
-  network = google_compute_network.global_vpc[0].id
+  network = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
 }
 
 # Configure Cloud NAT on the Cloud Router
 resource "google_compute_router_nat" "custom_nat" {
-  count  = var.create_network ? 1 : 0
   name   = "${var.region}-custom-nat-${random_string.vault.result}"
   router = google_compute_router.custom_router[0].name
   region = google_compute_router.custom_router[0].region
@@ -101,7 +99,6 @@ resource "google_dns_record_set" "vip" {
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.vault_lb_8200.status[0].load_balancer[0].ingress[0].ip]
-  # rrdatas = [google_compute_address.public.address]
 }
 
 # Create A record for External VIP CLUSTER PORT
@@ -112,7 +109,6 @@ resource "google_dns_record_set" "vip_cluster_port" {
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.vault_lb_8201.status[0].load_balancer[0].ingress[0].ip]
-  # rrdatas = [google_compute_address.public.address]
 }
 
 # Create A record for External VIP KMIP
@@ -124,5 +120,4 @@ resource "google_dns_record_set" "vip_kmip" {
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.vault_lb_5696.status[0].load_balancer[0].ingress[0].ip]
-  # rrdatas = [google_compute_address.public.address]
 }

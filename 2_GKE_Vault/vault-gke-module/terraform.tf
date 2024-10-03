@@ -40,15 +40,19 @@ module "vault1" {
   vault_enterprise     = var.vault_enterprise
   region               = var.region
   kmip_enable          = true
-  vpc_name             = "vpc1"
+  vpc_name             = "europe-west1-demo-vpc-lxj9"
   acme_prod            = true
   gke_autopilot_enable = true
   vault_license        = var.vault_license
   node_count           = 5
   location             = "global"
   storage_location     = "EU"
+  create_vpc            = false
+  subnet1-region       = "10.2.1.0/24"
+  subnet2-region       = "10.2.10.0/24"
 }
 
+/*
 module "vault2" {
   source               = "./terraform-google-vaultgke"
   email                = var.email
@@ -67,3 +71,4 @@ module "vault2" {
   location             = "global"
   storage_location     = "EU"
 }
+*/

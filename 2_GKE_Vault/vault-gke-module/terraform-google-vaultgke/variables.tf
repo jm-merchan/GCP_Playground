@@ -142,3 +142,9 @@ variable "with_node_pool" {
   type        = bool
   default     = false
 }
+
+variable "create_vpc" {
+  description = "Whether to create a VPC"
+  default     = true
+  type        = bool
+}

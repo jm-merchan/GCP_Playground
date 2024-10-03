@@ -17,7 +17,7 @@ locals {
       leader_tls_servername = "${var.cluster-name}-${var.region1}-${random_string.vault.result}.${local.domain}"
       location              = var.location
       project               = var.project_id
-      resource_name         = "${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"
+      resource_name         = "${var.region1}-vault-${random_string.vault.result}"
       tls_secret_id         = "${var.tls_secret_id}-${random_string.vault.result}"
       vault_license         = var.vault_license
       vault_version         = local.vault_version
@@ -28,10 +28,10 @@ locals {
 
 resource "google_compute_instance_template" "vault" {
   depends_on   = [acme_certificate.certificate]
-  name_prefix  = "${var.resource_name_prefix}-vault-${random_string.vault.result}"
+  name_prefix  = "${var.region1}-vault-${random_string.vault.result}"
   machine_type = var.machine_type
 
-  tags = ["${var.resource_name_prefix}-${var.region1}-${random_string.vault.result}"]
+  tags = ["${var.region1}-vault-${random_string.vault.result}"]
 
   metadata_startup_script = local.vault_user_data
 
@@ -73,9 +73,9 @@ data "google_compute_zones" "available" {
 }
 
 resource "google_compute_region_instance_group_manager" "vault" {
-  name                      = "${var.resource_name_prefix}-vault-group-manager"
+  name                      = "${var.region1}-vault-group-manager-${random_string.vault.result}"
   region                    = var.region1
-  base_instance_name        = "${var.resource_name_prefix}-vault-${var.resource_name_prefix}"
+  base_instance_name        = "${var.region1}-vault"
   distribution_policy_zones = data.google_compute_zones.available.names
 
   target_size = var.node_count

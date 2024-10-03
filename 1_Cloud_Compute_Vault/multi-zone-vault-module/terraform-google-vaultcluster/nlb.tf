@@ -1,6 +1,6 @@
 # Private Endpoint for internal load balancer
 resource "google_compute_address" "internal" {
-  name         = "${var.resource_name_prefix}-vault-internal-lb-${random_string.vault.result}"
+  name         = "${var.region1}-vault-internal-lb-${random_string.vault.result}"
   region       = var.region1
   address_type = "INTERNAL"
   purpose      = "GCE_ENDPOINT"
@@ -8,7 +8,7 @@ resource "google_compute_address" "internal" {
 }
 
 resource "google_compute_address" "internal2" {
-  name         = "${var.resource_name_prefix}-vault-internal-lb2-${random_string.vault.result}"
+  name         = "${var.region1}-vault-internal-lb2-${random_string.vault.result}"
   region       = var.region1
   address_type = "INTERNAL"
   purpose      = "GCE_ENDPOINT"
@@ -17,7 +17,7 @@ resource "google_compute_address" "internal2" {
 
 # Public Endpoint for public load balancer
 resource "google_compute_address" "public" {
-  name         = "${var.resource_name_prefix}-vault-public-lb-${random_string.vault.result}"
+  name         = "${var.region1}-vault-public-lb-${random_string.vault.result}"
   region       = var.region1
   address_type = "EXTERNAL"
   # purpose      = "GCE_ENDPOINT"
@@ -26,7 +26,7 @@ resource "google_compute_address" "public" {
 
 # Health check to load balance against all nodes
 resource "google_compute_region_health_check" "lb" {
-  name               = "${var.resource_name_prefix}-vault-interal-lb-${var.region1}-${random_string.vault.result}"
+  name               = "${var.region1}-vault-interal-lb-${var.region1}-${random_string.vault.result}"
   region             = var.region1
   check_interval_sec = 30
   description        = "The health check of the internal load balancer for Vault"
@@ -40,7 +40,7 @@ resource "google_compute_region_health_check" "lb" {
 
 # Health check to detect active node
 resource "google_compute_region_health_check" "lb_cluster" {
-  name               = "${var.resource_name_prefix}-vault-interal-lb-cluster-${var.region1}-${random_string.vault.result}"
+  name               = "${var.region1}-vault-interal-lb-cluster-${var.region1}-${random_string.vault.result}"
   region             = var.region1
   check_interval_sec = 30
   description        = "The health check of the internal load balancer for Vault"
@@ -54,7 +54,7 @@ resource "google_compute_region_health_check" "lb_cluster" {
 
 resource "google_compute_region_backend_service" "lb" {
   health_checks         = [google_compute_region_health_check.lb.self_link]
-  name                  = "${var.resource_name_prefix}-vault-internal-lb-api-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-internal-lb-api-${random_string.vault.result}"
   region                = var.region1
   description           = "The backend service of the internal load balancer for Vault"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -76,7 +76,7 @@ resource "google_compute_region_backend_service" "lb" {
 # External Backend for Vault on port 8200
 resource "google_compute_region_backend_service" "lb-ext-api" {
   health_checks         = [google_compute_region_health_check.lb.self_link]
-  name                  = "${var.resource_name_prefix}-vault-external-lb-api-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb-api-${random_string.vault.result}"
   region                = var.region1
   description           = "The backend service of the external load balancer for Vault"
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -97,7 +97,7 @@ resource "google_compute_region_backend_service" "lb-ext-api" {
 # External Backend for Vault on port 8201
 resource "google_compute_region_backend_service" "lb-ext-cluster" {
   health_checks         = [google_compute_region_health_check.lb_cluster.self_link]
-  name                  = "${var.resource_name_prefix}-vault-external-lb-cluster-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb-cluster-${random_string.vault.result}"
   region                = var.region1
   description           = "The backend service of the external load balancer for Vault on port 8201"
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -119,7 +119,7 @@ resource "google_compute_region_backend_service" "lb-ext-cluster" {
 resource "google_compute_region_backend_service" "lb-ext-kmip" {
   count                 = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
   health_checks         = [google_compute_region_health_check.lb.self_link]
-  name                  = "${var.resource_name_prefix}-vault-external-lb-kmip-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb-kmip-${random_string.vault.result}"
   region                = var.region1
   description           = "The backend service of the external load balancer for Vault on port 5696"
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -140,7 +140,7 @@ resource "google_compute_region_backend_service" "lb-ext-kmip" {
 
 resource "google_compute_region_url_map" "lb" {
   default_service = google_compute_region_backend_service.lb.self_link
-  name            = "${var.resource_name_prefix}-vault-internal-lb-${random_string.vault.result}"
+  name            = "${var.region1}-vault-internal-lb-${random_string.vault.result}"
   region          = var.region1
   description     = "The URL map of the internal load balancer for Vault"
 }
@@ -179,7 +179,7 @@ resource "google_dns_record_set" "vip-int2" {
 
 # Regional SSL Certificate with the content of the Let's Encrypt signed server previously created
 resource "google_compute_region_ssl_certificate" "vault_ssl_cert" {
-  name   = "${var.resource_name_prefix}-vault-ssl-cert-${random_string.vault.result}"
+  name   = "${var.region1}-vault-ssl-cert-${random_string.vault.result}"
   region = var.region1
   # private_key = tls_private_key.server.private_key_pem
   private_key = local.vault_key
@@ -189,7 +189,7 @@ resource "google_compute_region_ssl_certificate" "vault_ssl_cert" {
 
 # Frontend configuration for internal LB on port 8200
 resource "google_compute_region_target_https_proxy" "lb" {
-  name             = "${var.resource_name_prefix}-vault-internal-lb-${var.region1}-${random_string.vault.result}"
+  name             = "${var.region1}-vault-internal-lb-${var.region1}-${random_string.vault.result}"
   region           = var.region1
   ssl_certificates = [google_compute_region_ssl_certificate.vault_ssl_cert.self_link]
   url_map          = google_compute_region_url_map.lb.self_link
@@ -199,7 +199,7 @@ resource "google_compute_region_target_https_proxy" "lb" {
 
 # Frontend configuration for external LB on port 8200
 resource "google_compute_region_target_tcp_proxy" "ext-lb-api" {
-  name            = "${var.resource_name_prefix}-vault-external-lb-api-${var.region1}-${random_string.vault.result}"
+  name            = "${var.region1}-vault-external-lb-api-${var.region1}-${random_string.vault.result}"
   region          = var.region1
   backend_service = google_compute_region_backend_service.lb-ext-api.id
   description     = "The target TCP proxy of the external load balancer for Vault api port"
@@ -207,7 +207,7 @@ resource "google_compute_region_target_tcp_proxy" "ext-lb-api" {
 
 # Frontend configuration for external LB on port 8201
 resource "google_compute_region_target_tcp_proxy" "ext-lb-cluster" {
-  name            = "${var.resource_name_prefix}-vault-external-lb-cluster-${var.region1}-${random_string.vault.result}"
+  name            = "${var.region1}-vault-external-lb-cluster-${var.region1}-${random_string.vault.result}"
   region          = var.region1
   backend_service = google_compute_region_backend_service.lb-ext-cluster.id
   description     = "The target TCP proxy of the external load balancer for Vault cluster port"
@@ -216,7 +216,7 @@ resource "google_compute_region_target_tcp_proxy" "ext-lb-cluster" {
 # Frontend configuration for external LB on port 5696
 resource "google_compute_region_target_tcp_proxy" "ext-lb-kmip" {
   count           = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
-  name            = "${var.resource_name_prefix}-vault-external-lb-kmip-${var.region1}-${random_string.vault.result}"
+  name            = "${var.region1}-vault-external-lb-kmip-${var.region1}-${random_string.vault.result}"
   region          = var.region1
   backend_service = google_compute_region_backend_service.lb-ext-kmip[count.index].id
   description     = "The target TCP proxy of the external load balancer for Vault kmip port"
@@ -226,13 +226,13 @@ resource "google_compute_region_target_tcp_proxy" "ext-lb-kmip" {
 # Port 443 route for internal load balancer with HTTPS interception
 resource "google_compute_forwarding_rule" "lb1" {
   depends_on            = [google_compute_subnetwork.proxy_only_subnet]
-  name                  = "${var.resource_name_prefix}-vault-internal-lb1-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-internal-lb1-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.internal.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = 443
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_https_proxy.lb.id
   subnetwork            = google_compute_subnetwork.subnet1.id # same subnet as VIP
 }
@@ -240,62 +240,62 @@ resource "google_compute_forwarding_rule" "lb1" {
 # Port 8200  route for internal load balancer with HTTPS interception
 resource "google_compute_forwarding_rule" "lb2" {
   depends_on            = [google_compute_subnetwork.proxy_only_subnet]
-  name                  = "${var.resource_name_prefix}-vault-internal-lb2-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-internal-lb2-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.internal2.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = 8200
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_https_proxy.lb.id
   subnetwork            = google_compute_subnetwork.subnet1.id # same subnet as VIP
 }
 
 # Port 8200  route for external load balancer 
 resource "google_compute_forwarding_rule" "ext-lb1" {
-  name                  = "${var.resource_name_prefix}-vault-external-lb1-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb1-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.public.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = 8200
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_tcp_proxy.ext-lb-api.id
 }
 
 # Port 443  route for external load balancer 
 resource "google_compute_forwarding_rule" "ext-lb2" {
-  name                  = "${var.resource_name_prefix}-vault-external-lb2-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb2-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.public.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = 443
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_tcp_proxy.ext-lb-api.id
 }
 
 # Port 8201  route for external load balancer 
 resource "google_compute_forwarding_rule" "ext-lb3" {
-  name                  = "${var.resource_name_prefix}-vault-external-lb3-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-lb3-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.public.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = 8201
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_tcp_proxy.ext-lb-cluster.id
 }
 
 # Port 5696  route for external load balancer 
 resource "google_compute_forwarding_rule" "ext-lb4" {
   count                 = var.kmip_enable == true ? 1 : 0 # if kmip_enable==true then create, otherwise not
-  name                  = "${var.resource_name_prefix}-vault-external-kmip-${random_string.vault.result}"
+  name                  = "${var.region1}-vault-external-kmip-${random_string.vault.result}"
   region                = var.region1
   ip_address            = google_compute_address.public.address
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = 5696
-  network               = google_compute_network.global_vpc.id
+  network               = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   target                = google_compute_region_target_tcp_proxy.ext-lb-kmip[count.index].id
 }

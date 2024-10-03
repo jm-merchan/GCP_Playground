@@ -2,18 +2,24 @@ variable "location" {
   type    = string
   default = "global"
 }
-variable "region1" {
+variable "region" {
   type    = string
   default = "europe-west1"
 }
 
-variable "subnet1-region1" {
+variable "subnet1-region" {
   type        = string
   description = "Subnet to deploy VMs and VIPs"
   default     = "10.0.1.0/24"
 }
 
-variable "subnet4-region1" {
+variable "subnet2-region" {
+  type        = string
+  description = "Reserverd Range for Private Service Access"
+  default     = "10.0.2.0/24"
+}
+
+variable "subnet4-region" {
   type        = string
   description = "proxy-only subnet for EXTERNAL LOAD BALANCER"
   default     = "10.0.4.0/24"
@@ -21,7 +27,7 @@ variable "subnet4-region1" {
 
 variable "vpc_name" {
   type        = string
-  description = "Name of the VPC that will be created or that will be used in case of variable create_vpc == false"
+  description = "VPC Name"
 }
 
 variable "project_id" {
@@ -38,18 +44,13 @@ variable "dns_zone_name_ext" {
 variable "tls_secret_id" {
   type        = string
   description = "Secret id/name given to the google secrets manager secret"
-  default     = "vault-and-lb-certificate"
+  default     = "boundary-secret-demo"
 }
 
-variable "shared_san" {
-  type        = string
-  description = "This is a shared server name that the certs for all Vault nodes contain. This is the same value you will supply as input to the Vault installation module for the leader_tls_servername variable"
-  default     = "vault.server.com"
-}
 
 variable "node_count" {
   type    = number
-  default = 5
+  default = 3
 }
 
 variable "machine_type" {
@@ -68,29 +69,14 @@ variable "disk_type" {
 
 }
 
-variable "vault_version" {
+variable "boundary_version" {
   type = string
 }
 
-variable "vault_lb_health_check" {
+variable "boundary_lb_health_check" {
   type    = string
-  default = "/v1/sys/health?activecode=200&standbycode=200&performancestandbycode=200&drsecondarycode=200&uninitcode=200"
+  default = "/health"
 
-}
-
-variable "vault_lb_cluster_health_check" {
-  type    = string
-  default = "/v1/sys/health?activecode=200&standbycode=500&performancestandbycode=500"
-}
-
-variable "resource_name_prefix" {
-  type    = string
-  default = "vmdemo"
-}
-
-variable "dns_zone_name_int" {
-  type    = string
-  default = "lab.int."
 }
 
 variable "email" {
@@ -100,18 +86,28 @@ variable "email" {
 
 variable "cluster-name" {
   type        = string
-  description = "Prefix to identify the vault cluster. This name will be used in the public DNS names and certificate"
+  description = "Prefix to identify the boundary cluster. This name will be used in the public DNS names and certificate"
 }
 
-variable "vault_license" {
-  description = "Vault Enterprise License"
+variable "acme_prod" {
+  type        = bool
+  description = "Whether to use ACME prod url or not"
+  default     = false
+}
+
+locals {
+  acme_prod = var.acme_prod == true ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
+
+variable "boundary_license" {
+  description = "BOUNDARY Enterprise License"
   type        = string
   default     = "empty"
   sensitive   = true
 }
 
 variable "allowed_networks" {
-  description = "CIDR range allowed to connect to Vault from Internet"
+  description = "CIDR range allowed to connect to BOUNDARY from Internet"
   type        = string
   default     = "0.0.0.0/0"
 }
@@ -122,28 +118,34 @@ variable "networking_healthcheck_ips" {
   default     = ["35.191.0.0/16", "130.211.0.0/22"]
 }
 
-variable "vault_enterprise" {
-  description = "Whether using Vault Enterprise or not"
+variable "boundary_enterprise" {
+  description = "Whether using BOUNDARY Enterprise or not"
   type        = bool
   default     = true
 }
 
-variable "kmip_enable" {
-  description = "Enable kmip loadbalancer. Requires Vault Enterprise"
-  type        = bool
-  default     = false
+variable "boundary_log_path" {
+  description = "Path to store BOUNDARY logs. Logrotate and Ops Agent are configured to operate with logs in this path"
+  type        = string
+  default     = "/var/log/boundary/audit.log"
 }
 
-variable "vault_log_path" {
-  description = "Path to store Vault logs. Logrotate and Ops Agent are configured to operate with logs in this path"
+variable "db_username" {
+  description = "Postgres username"
   type        = string
-  default     = "/var/log/vault.log"
+  sensitive   = true
 }
 
-variable "storage_location" {
-  description = "The Geo to store the snapshots"
+variable "db_password" {
+  description = "Postgres user password"
   type        = string
-  default     = "EU"
+  sensitive   = true
+}
+
+variable "instance_name" {
+  description = "Name of the postgres instance"
+  type        = string
+  default     = "postgres-instance"
 }
 
 variable "create_vpc" {

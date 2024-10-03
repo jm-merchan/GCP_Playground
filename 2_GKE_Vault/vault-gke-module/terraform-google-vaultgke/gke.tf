@@ -1,11 +1,3 @@
-# Depending on whether you want to create the VPC and subnet or pass the ids of precreated ones we are going to match the values based on locals variables.
-locals {
-  network                       = var.create_network == true ? google_compute_network.global_vpc[0].id : var.vpc_reference
-  subnetwork                    = var.create_network == true ? google_compute_subnetwork.subnet1[0].id : var.subnet_reference
-  services_secondary_range_name = var.create_network == true ? google_compute_subnetwork.subnet1[0].secondary_ip_range[0].range_name : false
-  cluster_secondary_range_name  = var.create_network == true ? google_compute_subnetwork.subnet1[0].secondary_ip_range[1].range_name : false
-}
-
 resource "google_container_cluster" "default" {
   # Add reference to autopilot in name if autopilot cluster
   name = var.gke_autopilot_enable == false ? "${var.region}-gke-cluster${random_string.vault.result}" : "${var.region}-autopilot-cluster${random_string.vault.result}"
@@ -14,14 +6,14 @@ resource "google_container_cluster" "default" {
   enable_autopilot         = var.gke_autopilot_enable
   enable_l4_ilb_subsetting = true
 
-  network            = local.network
-  subnetwork         = local.subnetwork
+  network            = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
+  subnetwork         = google_compute_subnetwork.subnet1.id 
   initial_node_count = 1
 
   ip_allocation_policy {
     stack_type                    = "IPV4"
-    services_secondary_range_name = local.services_secondary_range_name
-    cluster_secondary_range_name  = local.cluster_secondary_range_name
+    services_secondary_range_name = google_compute_subnetwork.subnet1.secondary_ip_range[0].range_name 
+    cluster_secondary_range_name  = google_compute_subnetwork.subnet1.secondary_ip_range[1].range_name 
   }
 
   # Set `deletion_protection` to `true` will ensure that one cannot

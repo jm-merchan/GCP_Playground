@@ -8,9 +8,10 @@ output "cluster1_init_remote" {
 }
 
 output "cluster1_fqdn_8201" {
-    value = module.vault1.fqdn_8201
+  value = module.vault1.fqdn_8201
 }
 
+/*
 # --------------------------------------
 
 # Outputs for cluster2
@@ -23,5 +24,6 @@ output "cluster2_init_remote" {
 }
 
 output "cluster2_fqdn_8201" {
-    value = module.vault2.fqdn_8201
+  value = module.vault2.fqdn_8201
 }
+*/

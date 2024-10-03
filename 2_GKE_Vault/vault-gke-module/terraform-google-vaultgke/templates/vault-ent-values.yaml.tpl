@@ -62,6 +62,16 @@ server:
                 app.kubernetes.io/instance: "{{ .Release.Name }}"
                 component: server
             topologyKey: kubernetes.io/hostname
+   
+   statefulSet:
+      securityContext:
+         container: 
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            #capabilities:
+            #   add: ["IPC_LOCK"]
+   
    ha:
       enabled: true
       replicas: ${number_nodes}
@@ -71,12 +81,13 @@ server:
          config: |
             ui = true
             listener "tcp" {
-               tls_disable = 0 # Disabling TLS to avoid issues when connecting to Vault via port forwarding
-               address = "[::]:8200"
-               cluster_address = "[::]:8201"
-               tls_cert_file = "/vault/userconfig/vault-ha-tls/vault.crt"
-               tls_key_file  = "/vault/userconfig/vault-ha-tls/vault.key"
-               tls_client_ca_file = "/vault/userconfig/vault-ha-tls/vault.ca"
+               tls_disable                = 0 # Disabling TLS to avoid issues when connecting to Vault via port forwarding
+               address                    = "[::]:8200"
+               cluster_address            = "[::]:8201"
+               tls_cert_file              = "/vault/userconfig/vault-ha-tls/vault.crt"
+               tls_key_file               = "/vault/userconfig/vault-ha-tls/vault.key"
+               tls_client_ca_file         = "/vault/userconfig/vault-ha-tls/vault.ca"
+               tls_disable_client_certs   = true
    
             }
             storage "raft" {
@@ -99,9 +110,9 @@ server:
             }
 
             telemetry {
-               disable_hostname = true
-               prometheus_retention_time = "12h"
-               unauthenticated_metrics_access = "true"
+               disable_hostname                 = true
+               prometheus_retention_time        = "12h"
+               unauthenticated_metrics_access   = "true"
             }
             disable_mlock = true
             service_registration "kubernetes" {}

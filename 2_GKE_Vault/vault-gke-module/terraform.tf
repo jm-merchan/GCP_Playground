@@ -60,7 +60,7 @@ module "vault2" {
   dns_zone_name_ext    = var.dns_zone_name_ext
   cluster-name         = "vault-secondary"
   vault_version        = var.vault_version
-  vault_enterprise = var.vault_enterprise
+  vault_enterprise     = var.vault_enterprise
   region               = var.region
   kmip_enable          = true
   vpc_name             = "vpc2"

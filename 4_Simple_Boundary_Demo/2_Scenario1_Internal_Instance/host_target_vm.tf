@@ -32,7 +32,7 @@ resource "google_compute_instance" "default" {
   network_interface {
     network    = data.terraform_remote_state.local_backend.outputs.vpc_id
     subnetwork = google_compute_subnetwork.subnet.id
-    access_config {}
+    # access_config {}
   }
 
   service_account {

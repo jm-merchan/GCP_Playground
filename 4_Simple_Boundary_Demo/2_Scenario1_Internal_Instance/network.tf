@@ -38,3 +38,15 @@ resource "google_compute_firewall" "allow_9202_worker1" {
   direction               = "INGRESS"
 }
 
+# Allow SSH to target1 from worker1
+resource "google_compute_firewall" "allow_SSH_target1-from-worker1" {
+  name    = "allow-ssh-target-1-from-worker1"
+  network = data.terraform_remote_state.local_backend.outputs.vpc_id
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_service_accounts = [google_service_account.worker.email]
+  target_service_accounts = [google_service_account.main.email]
+  direction               = "INGRESS"
+}

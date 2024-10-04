@@ -37,7 +37,7 @@ resource "boundary_host_catalog_static" "gcp_instance" {
 resource "boundary_host_static" "bar" {
   name            = "Scenario1_Public_Facing_Compute_instance"
   host_catalog_id = boundary_host_catalog_static.gcp_instance.id
-  address         = google_compute_instance.default.network_interface[0].access_config[0].nat_ip
+  address         = google_compute_instance.default.network_interface[0].network_ip
 
 }
 

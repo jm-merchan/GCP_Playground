@@ -27,7 +27,7 @@ variable "public_key" {
 variable "scenario1_target_alias" {
   type        = string
   description = "Alias for first target"
-  default     = "test"
+  default     = "scenario1.gcp.boundary.demo"
 }
 
 variable "project_id" {

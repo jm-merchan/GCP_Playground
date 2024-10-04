@@ -15,14 +15,14 @@ resource "boundary_scope" "project" {
 }
 
 resource "boundary_credential_store_static" "example" {
-  name        = "example_static_credential_store"
+  name        = "Boundary Static Credential Store"
   description = "Credential Store for First Target"
   scope_id    = boundary_scope.project.id
 }
 
 resource "boundary_credential_ssh_private_key" "example" {
-  name                = "example_ssh_private_key"
-  description         = "My first ssh private key credential!"
+  name                = "Private key for target1"
+  description         = "SSH Private Key"
   credential_store_id = boundary_credential_store_static.example.id
   username            = var.ssh_user
   private_key         = var.private_key
@@ -35,14 +35,14 @@ resource "boundary_host_catalog_static" "gcp_instance" {
 }
 
 resource "boundary_host_static" "bar" {
-  name            = "Scenario1_Public_Facing_Compute_instance"
+  name            = "Scenario1_Private_Compute_instance"
   host_catalog_id = boundary_host_catalog_static.gcp_instance.id
   address         = google_compute_instance.default.network_interface[0].network_ip
 
 }
 
 resource "boundary_host_set_static" "bar" {
-  name            = "Scenario1_Public_Facing_Compute_instance"
+  name            = "Scenario1_Private_Compute_instance"
   host_catalog_id = boundary_host_catalog_static.gcp_instance.id
 
   host_ids = [
@@ -54,8 +54,8 @@ resource "boundary_host_set_static" "bar" {
 
 resource "boundary_target" "gcp_linux_private" {
   type        = "tcp"
-  name        = "Scenario1_Public_Facing_Compute_instance"
-  description = "GCP COMpute Linux Public Facing Target"
+  name        = "Scenario1_Private_Compute_instance"
+  description = "GCP COMpute Linux Private Target"
   #egress_worker_filter     = " \"sm-egress-downstream-worker1\" in \"/tags/type\" "
   ingress_worker_filter    = " \"${var.worker_tag}\" in \"/tags/type\" "
   scope_id                 = boundary_scope.project.id
@@ -73,8 +73,8 @@ resource "boundary_target" "gcp_linux_private" {
 }
 
 resource "boundary_alias_target" "scenario1" {
-  name           = "Scenario1_Public_Facing_CloudCompute_instance"
-  description    = "GCP Linux Public Facing Target"
+  name           = "Scenario1_Private_CloudCompute_instance"
+  description    = "GCP Linux Private Target"
   scope_id       = "global"
   value          = var.scenario1_target_alias
   destination_id = boundary_target.gcp_linux_private.id

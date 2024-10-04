@@ -7,4 +7,5 @@ data "google_compute_network" "network" {
 
 locals {
   vpc_reference = var.create_vpc == false ?  data.google_compute_network.network[0].id : null
+  vpc_name = var.create_vpc == false ?  data.google_compute_network.network[0].name : null
 }

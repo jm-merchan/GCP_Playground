@@ -113,3 +113,7 @@ output "init_remote" {
   description = "Steps to initialize Vault from your terminal"
   value = local.init_remote
 }
+
+output "read_vault_token" {
+  value = "gcloud secrets versions access latest --secret=root_token_${var.region}_${random_string.vault.result} --project=${var.project_id}"
+}

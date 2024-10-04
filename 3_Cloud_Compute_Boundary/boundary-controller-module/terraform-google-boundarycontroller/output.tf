@@ -15,8 +15,9 @@ output "remove_database_before_destroy" {
   value       = "gcloud sql instances delete ${google_sql_database_instance.postgres_instance.name} --project=${var.project_id}"
 }
 
+
 output "remove_peering_before_destroy" {
-  value = "gcloud compute networks peerings delete ${google_service_networking_connection.private_vpc_connection.peering} --network=${var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference} --project=${var.project_id}"
+  value = "gcloud compute networks peerings delete ${google_service_networking_connection.private_vpc_connection.peering} --network=${var.create_vpc == true ? google_compute_network.global_vpc[0].name : local.vpc_name} --project=${var.project_id}"
 }
 
 output "key_ring" {
@@ -25,6 +26,10 @@ output "key_ring" {
 
 output "crypto_key" {
   value = google_kms_crypto_key.boundary_key_recovery.name
+}
+
+output "crypto_key_worker" {
+  value = google_kms_crypto_key.boundary_key_worker_auth.name
 }
 
 output "project" {

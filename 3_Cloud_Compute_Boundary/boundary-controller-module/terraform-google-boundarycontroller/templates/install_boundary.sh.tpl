@@ -51,13 +51,13 @@ disable_mlock = true
 
 controller {
   name = "boundary-controller"
-  description = "An example controller"
+  description = "Boundary Controller Cluster"
   database {
     url                   = "postgresql://${db_username}:${db_password}@${database_address}:5432/${database_name}"
     max_open_connections  = 5
   }
   graceful_shutdown_wait_duration = "10s"
-  public_cluster_addr             = "https://${cluster_name}"
+  public_cluster_addr             = "${cluster_name}:9201"
   # https://developer.hashicorp.com/boundary/docs/enterprise/licensing
   license                         = "file:///opt/boundary/boundary.hclic"
 }

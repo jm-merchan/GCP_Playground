@@ -64,7 +64,7 @@ resource "google_compute_router_nat" "custom_nat" {
 }
 
 module "boundary" {
-  source              = "../3_Cloud_Compute_Boundary/boundary-controller-module/terraform-google-boundarycontroller"
+  source              = "../../3_Cloud_Compute_Boundary/boundary-controller-module/terraform-google-boundarycontroller"
   dns_zone_name_ext   = var.dns_zone_name_ext
   project_id          = var.project_id
   create_vpc          = false
@@ -84,7 +84,7 @@ module "boundary" {
 }
 
 module "vault1" {
-  source               = "../2_GKE_Vault/vault-gke-module/terraform-google-vaultgke"
+  source               = "../../2_GKE_Vault/vault-gke-module/terraform-google-vaultgke"
   create_vpc           = false
   subnet1-region       = "10.2.1.0/24"
   subnet2-region       = "10.2.10.0/24"

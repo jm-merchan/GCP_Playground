@@ -73,6 +73,12 @@ resource "google_compute_instance" "worker_pki" {
     email  = google_service_account.worker.email
   }
   metadata_startup_script = local.boundary_user_data_pki
+
+  lifecycle {
+    ignore_changes = [
+      metadata_startup_script
+    ]
+  }
 }
 
 
@@ -99,6 +105,12 @@ resource "google_compute_instance" "worker_kms" {
     email  = google_service_account.worker.email
   }
   metadata_startup_script = local.boundary_user_data_kms
+
+  lifecycle {
+    ignore_changes = [
+      metadata_startup_script
+    ]
+  }
 
 }
 

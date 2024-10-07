@@ -37,7 +37,7 @@ resource "google_compute_firewall" "allow_9202_worker1_from_internet" {
   source_ranges = [
     var.allowed_networks,
     "172.17.0.0/16" # Pod Ranges
-  ] # Allow from defined CIDR range
+  ]                 # Allow from defined CIDR range
   target_service_accounts = [google_service_account.worker.email]
   direction               = "INGRESS"
 }

@@ -107,11 +107,11 @@ resource "boundary_host_set_static" "vault" {
 
 
 resource "boundary_target" "vault" {
-  type        = "tcp"
-  name        = "Scenario1_Private_Vault_instance"
-  description = "HashiCorp Vault Private Target"
-  egress_worker_filter     = " \"downstream\" in \"/tags/type\" "
-  ingress_worker_filter    = " \"${var.worker_tag}\" in \"/tags/type\" "
+  type                     = "tcp"
+  name                     = "Scenario1_Private_Vault_instance"
+  description              = "HashiCorp Vault Private Target"
+  egress_worker_filter     = " \"downstream\" in  \"/tags/type\" "
+  ingress_worker_filter    = " \"upstream\"   in  \"/tags/type\" "
   scope_id                 = boundary_scope.project.id
   session_connection_limit = -1
   default_port             = 8200

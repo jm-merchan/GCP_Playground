@@ -41,11 +41,11 @@ resource "google_project_iam_member" "workload_identity-role" {
 }
 
 resource "boundary_worker" "egress_pki_worker" {
-    count                       = var.worker_mode == "pki" ? 1 : 0
-    scope_id                    = "global"
-    name                        = "pki-worker2-egress-${random_string.string.result}"
-    worker_generated_auth_token = ""
-  
+  count                       = var.worker_mode == "pki" ? 1 : 0
+  scope_id                    = "global"
+  name                        = "pki-worker2-egress-${random_string.string.result}"
+  worker_generated_auth_token = ""
+
 }
 
 locals {
@@ -65,7 +65,7 @@ locals {
   boundary_user_data_k8s_pki = templatefile("${path.module}/templates/configMap_pki.yaml.tpl",
     {
       # activation_token = boundary_worker.ingress_pki_worker.controller_generated_activation_token
-      upstream         = var.worker_mode == "pki"  ? google_compute_instance.worker_pki[0].network_interface[0].network_ip : ""
+      upstream         = var.worker_mode == "pki" ? google_compute_instance.worker_pki[0].network_interface[0].network_ip : ""
       worker_type      = "worker-k8s"
       activation_token = var.worker_mode == "pki" ? boundary_worker.egress_pki_worker[0].controller_generated_activation_token : ""
       project          = var.project_id
@@ -78,7 +78,7 @@ locals {
 
 # Boundary Worker Config Map if using KMS
 resource "kubernetes_config_map" "boundary_kms" {
-  count = var.worker_mode == "kms" ? 1:0
+  count = var.worker_mode == "kms" ? 1 : 0
   metadata {
     name      = local.boundary
     namespace = kubernetes_namespace.boundary.metadata[0].name
@@ -91,7 +91,7 @@ resource "kubernetes_config_map" "boundary_kms" {
 
 # Boundary Worker Config Map if using PKI
 resource "kubernetes_config_map" "boundary_pki" {
-  count = var.worker_mode == "pki" ? 1:0
+  count = var.worker_mode == "pki" ? 1 : 0
   metadata {
     name      = local.boundary
     namespace = kubernetes_namespace.boundary.metadata[0].name
@@ -137,7 +137,7 @@ resource "kubernetes_deployment_v1" "boundary" {
         }
 
         container {
-          image = "josemerchan/boundary-worker:0.0.2"
+          image = "josemerchan/boundary-worker:0.0.3"
           name  = local.boundary
 
           port {
@@ -190,7 +190,7 @@ resource "kubernetes_deployment_v1" "boundary" {
 
 
 # Service for stateful set
-resource kubernetes_service master {
+resource "kubernetes_service" "master" {
   metadata {
     name      = local.boundary
     namespace = kubernetes_namespace.boundary.metadata[0].name
@@ -200,15 +200,15 @@ resource kubernetes_service master {
   }
 
   spec {
-    type             = "LoadBalancer"
+    type = "LoadBalancer"
     port {
       name        = "proxy"
       port        = 9202
       target_port = 9202
     }
 
-    selector =  {
-      app    = local.boundary
+    selector = {
+      app = local.boundary
     }
   }
 }
@@ -222,7 +222,7 @@ resource "kubernetes_stateful_set_v1" "boundary" {
     namespace = kubernetes_namespace.boundary.metadata[0].name
   }
   spec {
-    service_name = kubernetes_service.master.metadata[0].name 
+    service_name = kubernetes_service.master.metadata[0].name
     selector {
       match_labels = {
         app = local.boundary
@@ -234,7 +234,7 @@ resource "kubernetes_stateful_set_v1" "boundary" {
         name = "boundary-worker-storage-volume"
       }
       spec {
-        access_modes = ["ReadWriteOnce"]
+        access_modes       = ["ReadWriteOnce"]
         storage_class_name = "standard-rwo"
         resources {
           requests = {
@@ -253,7 +253,12 @@ resource "kubernetes_stateful_set_v1" "boundary" {
 
       spec {
         service_account_name = kubernetes_service_account.boundary.metadata[0].name
+        # Security context to set the fsGroup for PVC permissions
 
+        security_context {
+          run_as_user = 1000 # Assuming the boundary user has UID 1000
+          fs_group    = 1000 # This ensures the boundary user can write to the mounted volume
+        }
         volume {
           name = "boundary-worker-configuration-volume"
           config_map {
@@ -261,7 +266,7 @@ resource "kubernetes_stateful_set_v1" "boundary" {
             default_mode = "0644" # Octal for 420
           }
         }
-        
+
         volume {
           name = "boundary-worker-storage-volume"
           persistent_volume_claim {
@@ -270,7 +275,7 @@ resource "kubernetes_stateful_set_v1" "boundary" {
         }
 
         container {
-          image = "josemerchan/boundary-worker:0.0.2"
+          image = "josemerchan/boundary-worker:0.0.3"
           name  = local.boundary
 
           port {
@@ -283,13 +288,14 @@ resource "kubernetes_stateful_set_v1" "boundary" {
           }
 
           image_pull_policy = "Always"
+
           volume_mount {
             name       = "boundary-worker-configuration-volume"
             mount_path = "/opt/boundary/config/"
           }
 
           volume_mount {
-            name = "boundary-worker-storage-volume"
+            name       = "boundary-worker-storage-volume"
             mount_path = "/opt/boundary/data/"
           }
 

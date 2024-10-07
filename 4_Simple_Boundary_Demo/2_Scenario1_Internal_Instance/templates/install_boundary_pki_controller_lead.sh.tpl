@@ -53,25 +53,22 @@ listener "tcp" {
   purpose = "proxy"
 }
 
+listener "tcp" {
+  address = "0.0.0.0"
+  purpose = "ops"
+  tls_disable = true
+}
+
 worker {
-  name = "$instance_id"
   public_addr = "$public_ipv4"
   initial_upstreams = ["${upstream}:9201"]
   recording_storage_minimum_available_capacity = "500MB"
-  # auth_storage_path = "/etc/boundary.d/worker"
+  auth_storage_path = "/etc/boundary.d/worker"
   recording_storage_path="/tmp/boundary"
-  # controller_generated_activation_token = "activation_token"
+  controller_generated_activation_token = "${activation_token}"
   tags {
-    type = ["${worker_type}", "upstream"]
+    type = ["${worker_type}", "${function}"]
   }
-}
-
-kms "gcpckms" {
-  purpose     = "worker-auth"
-  key_ring    = "${key_ring}"
-  crypto_key  = "${cryto_key_worker}"
-  project     = "${project}"
-  region      = "${location}"
 }
 
 

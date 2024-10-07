@@ -60,5 +60,16 @@ variable "private_key" {
 variable "worker_tag" {
   type    = string
   default = "worker1"
-
 }
+
+
+variable "worker_mode" {
+  type        = string
+  default     = "kms"
+  description = "Whether to use PKI Worker Controller Lead or KMS. Valid values kms or pki"
+  validation {
+    condition     = contains(["kms", "pki"], var.worker_mode)
+    error_message = "The worker_mode variable must be one of 'kms' or 'pki'"
+  }
+}
+

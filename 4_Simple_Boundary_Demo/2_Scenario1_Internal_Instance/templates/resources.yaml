@@ -1,0 +1,149 @@
+# Using Ben's repo as example https://github.com/benemon/boundary-ingress-blog/blob/0.14/deploy/resources.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: boundary
+  annotations: iam.gke.io/gcp-service-account: ${service_account} 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: boundary-worker
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 9202
+    name: proxy
+  - port: 9203
+    name: ops
+  clusterIP: None
+  selector:
+    app: boundary-worker
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: boundary-worker-configuration
+immutable: false
+data:
+  worker.hcl: |-
+    disable_mlock = true
+
+    listener "tcp" {
+        address = "0.0.0.0"
+        purpose = "proxy"
+    }
+
+    listener "tcp" {
+        address = "0.0.0.0"
+        purpose = "ops"
+        tls_disable = true
+    }
+
+    worker {
+        name = "$instance_id"
+        public_addr = "$public_ipv4"
+        initial_upstreams = ["${upstream}:9201"]
+        recording_storage_minimum_available_capacity = "500MB"
+        recording_storage_path="/tmp/boundary"
+    tags {
+        type = ["${worker_type}", "${function}"]
+    }
+    }
+
+    kms "gcpckms" {
+        purpose     = "worker-auth"
+        key_ring    = "${key_ring}"
+        crypto_key  = "${cryto_key_worker}"
+        project     = "${project}"
+        region      = "${location}"
+    }
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: boundary-worker
+    app.kubernetes.io/component: boundary-worker
+    app.kubernetes.io/instance: boundary-worker
+    app.kubernetes.io/name: boundary-worker
+    app.kubernetes.io/part-of: boundary-worker
+  name: boundary-worker
+  serviceaccount: boundary
+spec:
+  replicas: 1
+  serviceName: boundary-worker
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: boundary-worker
+  template:
+    metadata:
+      labels:
+        app: boundary-worker
+    spec:
+      volumes:
+        - name: boundary-worker-configuration-volume
+          configMap:
+            name: boundary-worker-configuration
+            defaultMode: 420
+        - name: boundary-worker-storage-volume
+          persistentVolumeClaim:
+            claimName: boundary-worker-storage-volume
+      containers:
+        - resources: {}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9203
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 15
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9203
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 15
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: boundary-worker
+          env:
+            - name: CONTROLLER_GENERATED_ACTIVATION_TOKEN
+              value: ""
+            - name: HCP_BOUNDARY_CLUSTER_ID
+              value: ""
+          ports:
+            - name: proxy
+              containerPort: 9202
+              protocol: TCP
+            - name: metrics
+              containerPort: 9203
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: boundary-worker-configuration-volume
+              mountPath: /opt/boundary/config/
+            - name: boundary-worker-storage-volume
+              mountPath: /opt/boundary/data/
+          terminationMessagePolicy: File
+          image: 'josemerchan/boundary-worker:0.0.2'
+      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      name: boundary-worker-storage-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "managed-csi"
+      resources:
+        requests:
+          storage: 1Gi

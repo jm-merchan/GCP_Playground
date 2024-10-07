@@ -8,6 +8,18 @@ terraform {
       source  = "hashicorp/google"
       version = "6.5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.3"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.32.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.12.1"
+    }
   }
 }
 

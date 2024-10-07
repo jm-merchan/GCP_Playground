@@ -117,3 +117,16 @@ output "init_remote" {
 output "read_vault_token" {
   value = "gcloud secrets versions access latest --secret=root_token_${var.region}_${random_string.vault.result} --project=${var.project_id}"
 }
+
+
+locals {
+  kubernetes_cluster = {
+      host  = "https://${google_container_cluster.default.endpoint}"
+  token = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
+  }
+}
+
+output "kubernetes_cluster" {
+  value = local.kubernetes_cluster
+}

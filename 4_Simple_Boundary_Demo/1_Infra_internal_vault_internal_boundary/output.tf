@@ -54,3 +54,8 @@ output "vpc_id" {
 output "crypto_key_worker" {
   value = module.boundary.crypto_key_worker
 }
+
+output "kubernetes_cluster" {
+  value = module.vault1.kubernetes_cluster
+  sensitive = true
+}

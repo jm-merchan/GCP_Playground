@@ -1,12 +1,12 @@
 # https://developer.hashicorp.com/boundary/docs/install-boundary/initialize#create-your-first-login-account
 provider "boundary" {
-  addr             = "https://boundary-europe-southwest1-qa0v.josemerchan-6b5afd.gcp.sbx.hashicorpdemo.com"
+  addr             = "https://boundary-europe-southwest1-fngf.josemerchan-6b5afd.gcp.sbx.hashicorpdemo.com"
   tls_insecure     = true
   recovery_kms_hcl = <<EOT
     kms "gcpckms" {
     purpose     = "recovery"
-    key_ring    = "kms-boundary-keyring-qa0v"
-    crypto_key  = "kms-boundary-key-recovery-qa0v"
+    key_ring    = "kms-boundary-keyring-fngf"
+    crypto_key  = "kms-boundary-key-recovery-fngf"
     project     = "hc-3a75ea921bc74d7a92c108b2f36"
     region      = "global"
     }

@@ -195,7 +195,7 @@ resource "kubernetes_service" "master" {
     name      = local.boundary
     namespace = kubernetes_namespace.boundary.metadata[0].name
     annotations = {
-      "cloud.google.com/load-balancer-type" : "External"
+      "cloud.google.com/load-balancer-type" : "Internal"
     }
   }
 

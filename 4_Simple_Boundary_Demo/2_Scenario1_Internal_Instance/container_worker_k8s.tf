@@ -64,14 +64,14 @@ locals {
   )
   boundary_user_data_k8s_pki = templatefile("${path.module}/templates/configMap_pki.yaml.tpl",
     {
-      
+
       upstream         = var.worker_mode == "pki" ? google_compute_instance.worker_pki[0].network_interface[0].network_ip : ""
       worker_type      = "worker-k8s"
       activation_token = var.worker_mode == "pki" ? boundary_worker.egress_pki_worker[0].controller_generated_activation_token : ""
       project          = var.project_id
       location         = "global"
       function         = "downstream"
-      public_addr       = kubernetes_service.master.status[0].load_balancer[0].ingress[0].ip
+      public_addr      = kubernetes_service.master.status[0].load_balancer[0].ingress[0].ip
     }
   )
 }
@@ -256,12 +256,12 @@ resource "kubernetes_stateful_set_v1" "boundary" {
         service_account_name = kubernetes_service_account.boundary.metadata[0].name
         # Security context to set the fsGroup for PVC permissions
 
-   
+
         security_context {
           run_as_user = 1000 # Assuming the boundary user has UID 1000
           fs_group    = 1000 # This ensures the boundary user can write to the mounted volume
         }
- 
+
         volume {
           name = "boundary-worker-configuration-volume"
           config_map {

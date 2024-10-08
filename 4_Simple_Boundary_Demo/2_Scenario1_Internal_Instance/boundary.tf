@@ -125,21 +125,99 @@ resource "boundary_target" "vault" {
 
 }
 
-/*
-resource "boundary_alias_target" "vault" {
-  name           = "Scenario1_Private_Vault_instance"
-  description    = "Vault Private Target"
-  scope_id       = "global"
-  value          = "vault.gcp.boundary.demo"
-  destination_id = boundary_target.vault.id
-  #authorize_session_host_id = boundary_host_static.bar.id
-}
-*/
 resource "boundary_alias_target" "vault" {
   name           = "Scenario1_Private_Vault_instance"
   description    = "Vault Private Target"
   scope_id       = "global"
   value          = "vault-europe-southwest1-cd1h.josemerchan-6b5afd.gcp.sbx.hashicorpdemo.com"
   destination_id = boundary_target.vault.id
+  #authorize_session_host_id = boundary_host_static.bar.id
+}
+
+##########
+
+resource "boundary_scope" "project_ssh" {
+  name                     = "SSH Session Injection"
+  description              = "SSH Session Injection"
+  scope_id                 = boundary_scope.org.id
+  auto_create_admin_role   = true
+  auto_create_default_role = true
+}
+
+resource "boundary_credential_store_vault" "vault" {
+  name        = "certificates-store"
+  description = "Vault credential"
+  address     = "https://10.2.1.25:8200"
+  tls_skip_verify = true
+  token       = vault_token.boundary_token.client_token
+  scope_id    = boundary_scope.project_ssh.id
+}
+
+resource "boundary_credential_library_vault_ssh_certificate" "ssh" {
+  name                = "certificates-library"
+  description         = "Certificate Library"
+  credential_store_id = boundary_credential_store_vault.vault.id
+  path                = "ssh-client-signer/sign/boundary-client" # change to Vault backend path
+  username            = "admin"
+  key_type            = "ecdsa"
+  key_bits            = 521
+
+  extensions = {
+    permit-pty = ""
+  }
+}
+
+
+
+resource "boundary_host_catalog_static" "gcp_instance_ssh_injection" {
+  name        = "Target with SSH Injection"
+  description = "SSH catalog"
+  scope_id    = boundary_scope.project_ssh.id
+}
+
+resource "boundary_host_static" "ssh" {
+  name            = "SSH Session Injection"
+  host_catalog_id = boundary_host_catalog_static.gcp_instance_ssh_injection.id
+  address         = google_compute_instance.default.network_interface[0].network_ip
+}
+
+resource "boundary_host_set_static" "ssh" {
+  name            = "ssh-injection-host-set"
+  host_catalog_id = boundary_host_catalog_static.gcp_instance_ssh_injection.id
+
+  host_ids = [
+    boundary_host_static.ssh.id
+  ]
+}
+
+
+resource "boundary_target" "ssh" {
+  type        = "ssh"
+  name        = "Host Target with SSH Injection"
+  description = "Host Target with SSH Injection"
+  #egress_worker_filter     = " \"sm-egress-downstream-worker1\" in \"/tags/type\" "
+  ingress_worker_filter    = " \"${var.worker_tag}\" in \"/tags/type\" "
+  scope_id                 = boundary_scope.project_ssh.id
+  session_connection_limit = -1
+  default_port             = 22
+  host_source_ids = [
+    boundary_host_set_static.ssh.id
+  ]
+
+  # Comment this to avoid brokeing the credentials
+
+  injected_application_credential_source_ids = [
+    boundary_credential_library_vault_ssh_certificate.ssh.id
+  ]
+
+}
+
+
+resource "boundary_alias_target" "target_ssh_injection" {
+  name           = "Scenario3_ssh_injection"
+  description    = "Scenario3_ssh_injection"
+  scope_id       = "global"
+  value          = "scenario1-ssh.gcp.boundary.demo"
+  destination_id = boundary_target.ssh.id
   #authorize_session_host_id = boundary_host_static.bar.id
 }

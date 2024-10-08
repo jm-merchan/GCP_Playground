@@ -19,6 +19,15 @@ resource "google_service_account" "main" {
 }
 
 
+locals {
+  target_data = templatefile("${path.module}/templates/target.sh.tpl",
+    {
+      # activation_token = boundary_worker.ingress_pki_worker.controller_generated_activation_token
+      ca_pub = vault_ssh_secret_backend_ca.boundary.public_key
+    }
+  )
+}
+
 resource "google_compute_instance" "default" {
   name         = "target1"
   machine_type = var.machine_type
@@ -38,5 +47,13 @@ resource "google_compute_instance" "default" {
   service_account {
     scopes = ["cloud-platform"]
     email  = google_service_account.main.email
+  }
+
+  metadata_startup_script = local.target_data
+
+  lifecycle {
+    ignore_changes = [
+      metadata_startup_script
+    ]
   }
 }

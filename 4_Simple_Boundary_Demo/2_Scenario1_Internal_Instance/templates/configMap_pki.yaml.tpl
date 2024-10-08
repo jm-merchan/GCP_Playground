@@ -3,6 +3,7 @@ disable_mlock = true
 listener "tcp" {
     address = "0.0.0.0"
     purpose = "proxy"
+    tls_disable = true
 }
 
 listener "tcp" {

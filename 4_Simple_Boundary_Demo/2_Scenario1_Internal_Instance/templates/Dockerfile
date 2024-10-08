@@ -17,6 +17,7 @@ RUN chgrp -R 0 /usr/bin/boundary && \
     chmod -R g=u /usr/bin/boundary && \ 
     chown -R boundary:boundary /opt/boundary
 
+EXPOSE 9202 9203
 
 USER boundary
 

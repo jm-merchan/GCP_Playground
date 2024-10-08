@@ -21,6 +21,7 @@ timedatectl set-timezone UTC
 
 # Create recording folder
 mkdir /tmp/boundary/
+sudo chown boundary:boundary /tmp/boundary/
 
 sudo cat << EOF > /etc/systemd/system/boundary.service
 [Unit]
@@ -51,6 +52,7 @@ disable_mlock = true
 listener "tcp" {
   address = "0.0.0.0"
   purpose = "proxy"
+  tls_disable = true
 }
 
 listener "tcp" {

@@ -125,11 +125,21 @@ resource "boundary_target" "vault" {
 
 }
 
+/*
 resource "boundary_alias_target" "vault" {
   name           = "Scenario1_Private_Vault_instance"
   description    = "Vault Private Target"
   scope_id       = "global"
   value          = "vault.gcp.boundary.demo"
+  destination_id = boundary_target.vault.id
+  #authorize_session_host_id = boundary_host_static.bar.id
+}
+*/
+resource "boundary_alias_target" "vault" {
+  name           = "Scenario1_Private_Vault_instance"
+  description    = "Vault Private Target"
+  scope_id       = "global"
+  value          = "vault-europe-southwest1-cd1h.josemerchan-6b5afd.gcp.sbx.hashicorpdemo.com"
   destination_id = boundary_target.vault.id
   #authorize_session_host_id = boundary_host_static.bar.id
 }

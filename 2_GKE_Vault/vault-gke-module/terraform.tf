@@ -50,7 +50,7 @@ module "vault1" {
   create_vpc            = true
   subnet1-region       = "10.2.1.0/24"
   subnet2-region       = "10.2.10.0/24"
-  expose = "Internal"
+  expose = "External"
 }
 
 
@@ -72,5 +72,5 @@ module "vault2" {
   location             = "global"
   storage_location     = "EU"
   create_vpc = true
-  expose = "Internal"
+  expose = "External"
 }

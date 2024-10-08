@@ -47,7 +47,7 @@ resource "kubernetes_service" "kmip" {
     }
 
     annotations = {
-      "cloud.google.com/load-balancer-type" = "External"
+      "cloud.google.com/load-balancer-type" = var.expose
       "meta.helm.sh/release-name"           = var.cluster-name
       "meta.helm.sh/release-namespace"      = kubernetes_namespace.vault.metadata[0].name
     }

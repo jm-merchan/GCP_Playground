@@ -148,3 +148,13 @@ variable "create_vpc" {
   default     = true
   type        = bool
 }
+
+variable "expose" {
+  description = "Whether to make Vault LB Internal or External"
+  type = string
+  validation {
+    condition     = contains(["Internal", "External"], var.expose)
+    error_message = "The expose variable must be one of 'Internal' or 'External'"
+  }
+  
+}

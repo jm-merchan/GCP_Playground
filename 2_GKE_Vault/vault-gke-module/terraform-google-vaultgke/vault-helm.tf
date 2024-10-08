@@ -118,6 +118,7 @@ locals {
       number_nodes          = var.node_count
       namespace             = kubernetes_namespace.vault.metadata[0].name
       service_account       = google_service_account.service_account.email
+      expose                = var.expose
     })
     # Templating CE Yaml
   vault_user_data_ce = templatefile("${path.module}/templates/vault-ce-values.yaml.tpl",
@@ -131,6 +132,7 @@ locals {
       number_nodes          = var.node_count
       namespace             = kubernetes_namespace.vault.metadata[0].name
       service_account       = google_service_account.service_account.email
+      expose                = var.expose
     }
   )
 }

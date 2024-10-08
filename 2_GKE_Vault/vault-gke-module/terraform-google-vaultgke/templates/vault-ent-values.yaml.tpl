@@ -19,7 +19,7 @@ server:
       sessionAffinity: "ClientIP"
       externalTrafficPolicy: Local
       annotations:
-         cloud.google.com/load-balancer-type: "External"
+         cloud.google.com/load-balancer-type: "${expose}"
          # networking.gke.io/load-balancer-ip-addresses: _static_ip_
          # cloud.google.com/l4-rbs: "enabled"
    image:

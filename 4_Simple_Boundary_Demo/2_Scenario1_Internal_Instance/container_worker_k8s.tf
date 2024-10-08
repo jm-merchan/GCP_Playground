@@ -64,13 +64,14 @@ locals {
   )
   boundary_user_data_k8s_pki = templatefile("${path.module}/templates/configMap_pki.yaml.tpl",
     {
-      # activation_token = boundary_worker.ingress_pki_worker.controller_generated_activation_token
+      
       upstream         = var.worker_mode == "pki" ? google_compute_instance.worker_pki[0].network_interface[0].network_ip : ""
       worker_type      = "worker-k8s"
       activation_token = var.worker_mode == "pki" ? boundary_worker.egress_pki_worker[0].controller_generated_activation_token : ""
       project          = var.project_id
       location         = "global"
       function         = "downstream"
+      public_addr       = kubernetes_service.master.status[0].load_balancer[0].ingress[0].ip
     }
   )
 }
@@ -137,7 +138,7 @@ resource "kubernetes_deployment_v1" "boundary" {
         }
 
         container {
-          image = "josemerchan/boundary-worker:0.0.3"
+          image = "josemerchan/boundary-worker:0.0.4"
           name  = local.boundary
 
           port {
@@ -255,15 +256,17 @@ resource "kubernetes_stateful_set_v1" "boundary" {
         service_account_name = kubernetes_service_account.boundary.metadata[0].name
         # Security context to set the fsGroup for PVC permissions
 
+   
         security_context {
           run_as_user = 1000 # Assuming the boundary user has UID 1000
           fs_group    = 1000 # This ensures the boundary user can write to the mounted volume
         }
+ 
         volume {
           name = "boundary-worker-configuration-volume"
           config_map {
             name         = kubernetes_config_map.boundary_pki[0].metadata[0].name
-            default_mode = "0644" # Octal for 420
+            default_mode = "0644"
           }
         }
 
@@ -275,8 +278,9 @@ resource "kubernetes_stateful_set_v1" "boundary" {
         }
 
         container {
-          image = "josemerchan/boundary-worker:0.0.3"
+          image = "josemerchan/boundary-worker:0.0.4"
           name  = local.boundary
+          # command = [ "sh", "-c", "sleep 84000s" ]
 
           port {
             container_port = 9202
@@ -297,12 +301,6 @@ resource "kubernetes_stateful_set_v1" "boundary" {
           volume_mount {
             name       = "boundary-worker-storage-volume"
             mount_path = "/opt/boundary/data/"
-          }
-
-          security_context {
-            allow_privilege_escalation = false
-            privileged                 = false
-            read_only_root_filesystem  = false
           }
 
           liveness_probe {

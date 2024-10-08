@@ -56,6 +56,6 @@ output "crypto_key_worker" {
 }
 
 output "kubernetes_cluster" {
-  value = module.vault1.kubernetes_cluster
+  value     = module.vault1.kubernetes_cluster
   sensitive = true
 }

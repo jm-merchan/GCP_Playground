@@ -19,9 +19,9 @@ output "configure_kubectl" {
 }
 
 locals {
-  fqdn_ext8200 = substr(google_dns_record_set.vip.name, 0, length(google_dns_record_set.vip.name) - 1)
-  fqdn_ext8201 = substr(google_dns_record_set.vip_cluster_port.name, 0, length(google_dns_record_set.vip_cluster_port.name) - 1)
-  fqdn_ext5696 = (var.kmip_enable && var.vault_enterprise) ? substr(google_dns_record_set.vip_kmip[0].name, 0, length(google_dns_record_set.vip_kmip[0].name) - 1) : "not-enable"
+  fqdn_ext8200 = var.expose == "External" ? substr(google_dns_record_set.vip[0].name, 0, length(google_dns_record_set.vip[0].name) - 1) : " "
+  fqdn_ext8201 = var.expose == "External" ? substr(google_dns_record_set.vip_cluster_port[0].name, 0, length(google_dns_record_set.vip_cluster_port[0].name) - 1) : " "
+  fqdn_ext5696 = (var.kmip_enable && var.vault_enterprise && var.expose == "External" ) ? substr(google_dns_record_set.vip_kmip[0].name, 0, length(google_dns_record_set.vip_kmip[0].name) - 1) : " " 
 }
 
 output "fqdn_8200" {
@@ -122,8 +122,8 @@ output "read_vault_token" {
 locals {
   kubernetes_cluster = {
       host  = "https://${google_container_cluster.default.endpoint}"
-  token = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
+      token = data.google_client_config.default.access_token
+      cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
   }
 }
 

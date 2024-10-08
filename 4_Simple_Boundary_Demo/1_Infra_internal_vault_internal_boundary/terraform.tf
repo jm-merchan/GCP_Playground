@@ -80,7 +80,7 @@ module "boundary" {
   boundary_enterprise = var.boundary_enterprise
   db_username         = var.db_username
   db_password         = var.db_password
-  acme_prod            = var.acme_prod
+  acme_prod           = var.acme_prod
 }
 
 module "vault1" {
@@ -103,4 +103,5 @@ module "vault1" {
   node_count           = var.node_count
   location             = var.location
   storage_location     = "EU"
+  expose               = "Internal"
 }

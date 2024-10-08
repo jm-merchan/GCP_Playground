@@ -92,7 +92,7 @@ resource "boundary_alias_target" "scenario1" {
 resource "boundary_host_static" "vault" {
   name            = "Scenario1_Private_Vault"
   host_catalog_id = boundary_host_catalog_static.gcp_instance.id
-  address         = "vault-active.vault.svc.cluster.local "
+  address         = "vault-active.vault.svc.cluster.local"
 }
 
 resource "boundary_host_set_static" "vault" {

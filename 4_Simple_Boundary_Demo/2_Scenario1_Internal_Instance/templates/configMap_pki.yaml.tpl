@@ -12,6 +12,7 @@ listener "tcp" {
 }
 
 worker {
+    public_addr = "${public_addr}"
     initial_upstreams = ["${upstream}:9202"]
     recording_storage_minimum_available_capacity = "500MB"
     auth_storage_path = "/opt/boundary/data/"
@@ -19,5 +20,5 @@ worker {
     controller_generated_activation_token = "${activation_token}"
     tags {
         type = ["${worker_type}", "${function}"]
-}
+    }
 }

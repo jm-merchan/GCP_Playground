@@ -91,6 +91,7 @@ data "kubernetes_service" "vault_lb_5696" {
 
 # Create A record for External VIP API/UI
 resource "google_dns_record_set" "vip" {
+  count = var.expose == "External" ? 1:0
   name = "${var.cluster-name}-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
   ttl  = 300
@@ -101,6 +102,7 @@ resource "google_dns_record_set" "vip" {
 
 # Create A record for External VIP CLUSTER PORT
 resource "google_dns_record_set" "vip_cluster_port" {
+  count = var.expose == "External" ? 1:0
   name = "${var.cluster-name}-clusterport-${var.region}-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
   ttl  = 300
@@ -111,7 +113,7 @@ resource "google_dns_record_set" "vip_cluster_port" {
 
 # Create A record for External VIP KMIP
 resource "google_dns_record_set" "vip_kmip" {
-  count = (var.kmip_enable && var.vault_enterprise) ? 1 : 0
+  count = (var.kmip_enable && var.vault_enterprise && var.expose == "External") ? 1 : 0
   name  = "${var.cluster-name}-${var.region}-kmip-${random_string.vault.result}.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type  = "A"
   ttl   = 300

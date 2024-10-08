@@ -15,7 +15,8 @@ resource "google_compute_firewall" "allow_SSH_target1" {
     ports    = ["22"]
   }
   source_ranges = [
-    var.allowed_networks,
+    "0.0.0.0/0",
+    #var.allowed_networks,
     "35.235.240.0/20",
   ] # Allow from defined CIDR range
   target_service_accounts = [google_service_account.main.email, google_service_account.worker.email]
@@ -35,7 +36,8 @@ resource "google_compute_firewall" "allow_9202_worker1_from_internet" {
     ]
   }
   source_ranges = [
-    var.allowed_networks,
+    "0.0.0.0/0",
+    #var.allowed_networks,
     "172.17.0.0/16" # Pod Ranges
   ]                 # Allow from defined CIDR range
   target_service_accounts = [google_service_account.worker.email]

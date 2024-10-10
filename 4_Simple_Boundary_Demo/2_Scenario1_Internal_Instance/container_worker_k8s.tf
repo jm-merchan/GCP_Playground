@@ -1,16 +1,3 @@
-provider "kubernetes" {
-  # config_path = "~/.kube/config"
-
-  host                   = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["host"]
-  token                  = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["token"]
-  cluster_ca_certificate = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["cluster_ca_certificate"]
-
-  ignore_annotations = [
-    "^autopilot\\.gke\\.io\\/.*",
-    "^cloud\\.google\\.com\\/.*"
-  ]
-}
-
 locals {
   boundary = "boundary"
 }

@@ -36,6 +36,10 @@ provider "google" {
   project = var.project_id
 }
 
+provider "vault" {
+
+}
+
 # Remote Backend to obtain VPC details 
 data "terraform_remote_state" "local_backend" {
   backend = "local"
@@ -43,4 +47,17 @@ data "terraform_remote_state" "local_backend" {
   config = {
     path = "../1_Infra_internal_vault_internal_boundary/terraform.tfstate"
   }
+}
+
+provider "kubernetes" {
+  # config_path = "~/.kube/config"
+
+  host                   = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["host"]
+  token                  = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["token"]
+  cluster_ca_certificate = data.terraform_remote_state.local_backend.outputs.kubernetes_cluster["cluster_ca_certificate"]
+
+  ignore_annotations = [
+    "^autopilot\\.gke\\.io\\/.*",
+    "^cloud\\.google\\.com\\/.*"
+  ]
 }

@@ -129,7 +129,7 @@ resource "boundary_alias_target" "vault" {
   name           = "Scenario1_Private_Vault_instance"
   description    = "Vault Private Target"
   scope_id       = "global"
-  value          = "vault-europe-southwest1-cd1h.josemerchan-6b5afd.gcp.sbx.hashicorpdemo.com"
+  value          = "vault.gcp.boundary.demo"
   destination_id = boundary_target.vault.id
   #authorize_session_host_id = boundary_host_static.bar.id
 }
@@ -145,12 +145,12 @@ resource "boundary_scope" "project_ssh" {
 }
 
 resource "boundary_credential_store_vault" "vault" {
-  name        = "certificates-store"
-  description = "Vault credential"
-  address     = "https://10.2.1.25:8200"
+  name            = "certificates-store"
+  description     = "Vault credential"
+  address         = var.vault_addr
   tls_skip_verify = true
-  token       = vault_token.boundary_token.client_token
-  scope_id    = boundary_scope.project_ssh.id
+  token           = vault_token.boundary_token_ssh.client_token
+  scope_id        = boundary_scope.project_ssh.id
 }
 
 resource "boundary_credential_library_vault_ssh_certificate" "ssh" {

@@ -40,6 +40,16 @@ output "fqdn_kmip" {
 }
 
 locals {
+  helm = var.vault_enterprise ? helm_release.vault_enterprise[0].values : helm_release.vault_community[0].values
+}
+
+output "helm" {
+  value = local.helm
+
+}
+
+
+locals {
   init_remote_ent = <<EOF
 # ---------------------------
 # ===========================

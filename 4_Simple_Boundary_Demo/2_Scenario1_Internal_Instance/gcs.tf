@@ -43,6 +43,7 @@ resource "google_storage_bucket_iam_member" "member_object" {
   member = "serviceAccount:${google_service_account.worker.email}"
 }
 
+/*
 resource "boundary_storage_bucket" "gcs" {
   name        = "GCP Storage"
   description = "GCP Storage Bucket"
@@ -50,7 +51,7 @@ resource "boundary_storage_bucket" "gcs" {
   plugin_name = "minio"
   bucket_name = google_storage_bucket.miniobucket.name
   attributes_json = jsonencode({
-  "region" = "${var.region}",
+    "region" = "${var.region}",
   "disable_credential_rotation" : true })
 
   # recommended to pass in aws secrets using a file() or using environment variables
@@ -61,3 +62,4 @@ resource "boundary_storage_bucket" "gcs" {
   })
   worker_filter = " \"upstream\" in \"/tags/type\" "
 }
+*/

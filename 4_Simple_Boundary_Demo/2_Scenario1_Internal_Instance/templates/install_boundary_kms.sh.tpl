@@ -19,7 +19,7 @@ sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 echo "Configuring system time"
 timedatectl set-timezone UTC
 
-# Create recording folder
+# Create recording folder and provide permissions to the user running the boundary server on the worker
 mkdir /tmp/boundary/
 sudo chown boundary:boundary /tmp/boundary/
 
@@ -52,7 +52,6 @@ disable_mlock = true
 listener "tcp" {
   address = "0.0.0.0"
   purpose = "proxy"
-  tls_disable = true
 }
 
 listener "tcp" {

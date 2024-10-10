@@ -103,5 +103,5 @@ module "vault1" {
   node_count           = var.node_count
   location             = var.location
   storage_location     = "EU"
-  expose               = "Internal"
+  expose               = "External"
 }

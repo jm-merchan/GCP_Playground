@@ -59,3 +59,8 @@ output "kubernetes_cluster" {
   value     = module.vault1.kubernetes_cluster
   sensitive = true
 }
+
+output "helm" {
+  value     = module.vault1.helm
+    sensitive = true
+}

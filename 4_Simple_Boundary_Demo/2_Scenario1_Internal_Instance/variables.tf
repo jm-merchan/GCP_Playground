@@ -74,11 +74,19 @@ variable "worker_mode" {
 }
 
 variable "gcs_access_key" {
-  type = string
+  type        = string
   description = "Access key for S3 compatible bucket"
 }
 
 variable "gcs_secret_key" {
-  type = string
+  type        = string
   description = "Secret key for S3 compatible bucket"
+}
+
+variable "vault_token" {
+  type = string
+}
+
+variable "vault_addr" {
+  type = string
 }

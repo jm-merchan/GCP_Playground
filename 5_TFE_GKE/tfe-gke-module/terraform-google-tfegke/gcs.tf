@@ -19,7 +19,7 @@ resource "google_storage_bucket" "tfe_bucket" {
 
 resource "google_storage_bucket_iam_member" "member_object" {
   bucket = google_storage_bucket.tfe_bucket.name
-  role   = "roles/storage.objectUser"
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 

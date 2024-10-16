@@ -62,6 +62,7 @@ resource "google_compute_router_nat" "custom_nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES" # Allow all internal VMs to use this NAT for outbound traffic
 }
 
+
 # Getting details for tfe active
 data "kubernetes_service" "tfe" {
   depends_on = [helm_release.tfe_enterprise]
@@ -70,33 +71,25 @@ data "kubernetes_service" "tfe" {
     namespace = kubernetes_namespace.tfe.metadata[0].name # Namespace where the Helm chart deployed the service
   }
 }
-/*
-# Getting details for tfe service
-data "kubernetes_service" "tfe_lb_8200" {
-  depends_on = [helm_release.tfe_enterprise, helm_release.tfe_community]
-  metadata {
-    name      = var.cluster-name                            # Name of the service created by Helm
-    namespace = kubernetes_namespace.tfe.metadata[0].name # Namespace where the Helm chart deployed the service
-  }
-}
 
-# Getting details for kmip service
-data "kubernetes_service" "tfe_lb_5696" {
-  depends_on = [helm_release.tfe_enterprise, kubernetes_service.kmip]
-  metadata {
-    name      = "${var.cluster-name}-kmip"                  # Name of the service created by Helm
-    namespace = kubernetes_namespace.tfe.metadata[0].name # Namespace where the Helm chart deployed the service
-  }
-}
-*/
 
 # Create A record for External VIP API/UI
 resource "google_dns_record_set" "vip" {
   count = var.expose == "External" ? 1:0
-  name = "tfe.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  name = "tfe-${var.region}-${random_string.tfe.result}.${local.domain}."
   type = "A"
-  ttl  = 300
+  ttl  = 100
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.tfe.status[0].load_balancer[0].ingress[0].ip]
+}
+
+# https://developer.hashicorp.com/terraform/enterprise/deploy/initial-admin-user
+output "retrieve_initial_admin_creation_token" {
+  value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/retrieve-iact"
+}
+
+output "create_initial_admin_user" {
+  value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/account/new?token="
+  
 }

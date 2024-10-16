@@ -61,7 +61,7 @@ variable "gke_autopilot_enable" {
 variable "machine_type" {
   description = "Machine type"
   type        = string
-  default     = "e2-medium"
+  default     = "e2-standard-4"
 }
 
 variable "tfe_version" {

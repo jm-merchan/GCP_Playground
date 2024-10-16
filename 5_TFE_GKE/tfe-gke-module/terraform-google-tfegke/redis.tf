@@ -15,7 +15,7 @@ resource "google_project_service" "redis" {
 
 resource "google_redis_instance" "my_memorystore_redis_tfe" {
   depends_on         = [google_project_service.redis, time_sleep.wait_60_seconds]
-  name               = "tfe"
+  name               = "tfe-${random_string.tfe.result}"
   tier               = "BASIC"
   memory_size_gb     = 2
   region             = var.region

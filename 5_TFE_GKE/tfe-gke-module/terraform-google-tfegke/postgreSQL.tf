@@ -18,7 +18,7 @@ resource "time_sleep" "wait_60_seconds" {
 
 # Enable Private Services Access for the VPC
 resource "google_compute_global_address" "private_ip_range" {
-  name          = "private-ip-range"
+  name          = "private-ip-range-${random_string.tfe.result}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16

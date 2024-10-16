@@ -33,14 +33,14 @@ resource "google_service_account" "default" {
   display_name = "Service Account for GKE Node Pool"
 }
 
-
+/*
 # Uncomment to enable node pool
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   count      = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
   name       = "${var.region}-node-pool-${random_string.tfe.result}"
   location   = var.region
   cluster    = google_container_cluster.default.name
-  node_count = 3
+  node_count = 1
 
 
   node_config {
@@ -57,3 +57,4 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     }
   }
 }
+*/

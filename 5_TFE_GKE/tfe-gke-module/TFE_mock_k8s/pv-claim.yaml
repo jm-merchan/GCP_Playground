@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim # Create PVC
 metadata:
   name: postgresql-data-claim # Sets name of PV
-  namespace: vault
+  namespace: tfe
 spec:
   storageClassName: standard
   accessModes:

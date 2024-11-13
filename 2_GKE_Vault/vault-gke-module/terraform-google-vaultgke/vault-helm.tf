@@ -1,4 +1,3 @@
-/*
 # Create Vault namespace
 resource "kubernetes_namespace" "vault" {
   metadata {
@@ -169,4 +168,3 @@ resource "helm_release" "vault_community" {
   version   = var.vault_helm_release
   values = [local.vault_user_data_ce]
 }
-*/

@@ -14,8 +14,8 @@ resource "vault_token" "boundary_token_ssh" {
   policies          = ["boundary-controller", "ssh"]
   no_parent         = true
   renewable         = true
-  renew_min_lease = 43200
-  renew_increment = 86400
+  renew_min_lease   = 43200
+  renew_increment   = 86400
 
   metadata = {
     "purpose" = "service-account"

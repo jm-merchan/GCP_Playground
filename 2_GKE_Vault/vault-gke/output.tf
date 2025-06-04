@@ -15,7 +15,7 @@ output "kubernetes_cluster_host" {
 
 output "configure_kubectl" {
   description = "gcloud command to configure your kubeconfig once the cluster has been created"
-  value = "gcloud container clusters get-credentials ${google_container_cluster.default.name} --region ${var.region} --project ${var.project_id}"
+  value       = "gcloud container clusters get-credentials ${google_container_cluster.default.name} --region ${var.region} --project ${var.project_id}"
 }
 
 locals {
@@ -26,17 +26,17 @@ locals {
 
 output "fqdn_8200" {
   description = "FQDN for API and UI"
-  value = "https://${local.fqdn_ext8200}:8200"
+  value       = "https://${local.fqdn_ext8200}:8200"
 }
 
 output "fqdn_8201" {
   description = "FQDN for Cluster PORT pointing to Vault leader"
-  value = "https://${local.fqdn_ext8201}:8201"
+  value       = "https://${local.fqdn_ext8201}:8201"
 }
 
 output "fqdn_kmip" {
   description = "FQDN for KMIP PORT when enabled"
-  value      = "https://${local.fqdn_ext5696}:5696"
+  value       = "https://${local.fqdn_ext5696}:5696"
 }
 
 locals {
@@ -77,7 +77,7 @@ rm sa-keys__${var.region}_${random_string.vault.result}.json
 # ---------------------------
   EOF
 
-init_remote_ce = <<EOF
+  init_remote_ce = <<EOF
 # ---------------------------
 # ===========================
 # Initialize Vault
@@ -106,10 +106,10 @@ vault audit enable -path=stdout file file_path=stdout
 # ---------------------------
   EOF
 
-init_remote = (var.vault_enterprise) ? local.init_remote_ent: local.init_remote_ce
+  init_remote = (var.vault_enterprise) ? local.init_remote_ent : local.init_remote_ce
 }
 
 output "init_remote" {
   description = "Steps to initialize Vault from your terminal"
-  value = local.init_remote
+  value       = local.init_remote
 }

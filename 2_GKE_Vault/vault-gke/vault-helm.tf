@@ -118,8 +118,8 @@ locals {
       number_nodes          = var.node_count
       namespace             = kubernetes_namespace.vault.metadata[0].name
       service_account       = google_service_account.service_account.email
-    })
-    # Templating CE Yaml
+  })
+  # Templating CE Yaml
   vault_user_data_ce = templatefile("${path.module}/templates/vault-ce-values.yaml.tpl",
     {
       crypto_key            = google_kms_crypto_key.vault_key.name
@@ -146,7 +146,7 @@ resource "helm_release" "vault_enterprise" {
   namespace = kubernetes_namespace.vault.metadata[0].name
   chart     = "hashicorp/vault"
   version   = var.vault_helm_release
-  values = [local.vault_user_data_ent]
+  values    = [local.vault_user_data_ent]
 }
 
 # Deploy Vault Community
@@ -160,5 +160,5 @@ resource "helm_release" "vault_community" {
   namespace = kubernetes_namespace.vault.metadata[0].name
   chart     = "hashicorp/vault"
   version   = var.vault_helm_release
-  values = [local.vault_user_data_ce]
+  values    = [local.vault_user_data_ce]
 }

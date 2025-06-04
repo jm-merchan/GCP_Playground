@@ -8,7 +8,7 @@ resource "google_container_cluster" "default" {
 
   network            = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
   subnetwork         = google_compute_subnetwork.subnet1.id
-  initial_node_count = 1
+  initial_node_count = 2
 
   ip_allocation_policy {
     stack_type                    = "IPV4"
@@ -33,18 +33,17 @@ resource "google_service_account" "default" {
   display_name = "Service Account for GKE Node Pool"
 }
 
-/*
-# Uncomment to enable node pool
+
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   count      = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
   name       = "${var.region}-node-pool-${random_string.tfe.result}"
   location   = var.region
   cluster    = google_container_cluster.default.name
-  node_count = 1
+  node_count = var.node_count
 
 
   node_config {
-    preemptible  = true
+    preemptible  = false
     machine_type = var.machine_type
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
@@ -57,4 +56,3 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     }
   }
 }
-*/

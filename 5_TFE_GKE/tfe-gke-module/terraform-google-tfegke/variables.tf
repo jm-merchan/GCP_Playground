@@ -61,35 +61,14 @@ variable "gke_autopilot_enable" {
 variable "machine_type" {
   description = "Machine type"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-standard-8"
 }
 
-variable "tfe_version" {
-  description = "Vault version expressed as X{n}.X{1,n}.X{1,n}, for example 1.16.3"
-  type        = string
-}
-
-variable "tfe_enterprise" {
-  description = "Whether using Vault Enterprise or not"
-  type        = bool
-  default     = true
-}
-
-variable "kmip_enable" {
-  description = "Enable kmip loadbalancer. Requires Vault Enterprise"
-  type        = bool
-  default     = false
-}
 
 variable "tfe_license" {
-  description = "Vault Enterprise License as string"
-  type        = string
-  default     = "empty"
-  sensitive   = true
-}
-
-locals {
-  tfe_version = var.tfe_enterprise == false ? var.tfe_version : "${var.tfe_version}-ent"
+  type      = string
+  default   = "empty"
+  sensitive = true
 }
 
 variable "acme_prod" {
@@ -108,21 +87,18 @@ variable "email" {
 }
 
 variable "k8s_namespace" {
-  type        = string
-  description = "K8S namespace where to install Vault"
-  default     = "tfe"
+  type    = string
+  default = "tfe"
 }
 
 variable "tfe_helm_release" {
-  type        = string
-  description = "Helm release for Vault"
-  default     = "1.3.2"
+  type    = string
+  default = "1.3.2"
 }
 
 variable "node_count" {
   type        = number
-  description = "Number of Vault instances. Typically 3 or 5"
-  default     = 3
+  default     = 1
 }
 
 variable "storage_location" {
@@ -151,6 +127,7 @@ variable "expose" {
     condition     = contains(["Internal", "External"], var.expose)
     error_message = "The expose variable must be one of 'Internal' or 'External'"
   }
+  default = "External"
 
 }
 
@@ -170,4 +147,10 @@ variable "instance_name" {
   description = "Name of the postgres instance"
   type        = string
   default     = "postgres-instance"
+}
+
+variable "tfe_version" {
+  description = "TFE version to deploy"
+  type        = string
+  default     = "v202409-3"
 }

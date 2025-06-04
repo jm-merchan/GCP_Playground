@@ -67,7 +67,7 @@ resource "google_compute_router_nat" "custom_nat" {
 data "kubernetes_service" "tfe" {
   depends_on = [helm_release.tfe_enterprise]
   metadata {
-    name      = "terraform-enterprise"                # Name of the service created by Helm
+    name      = "terraform-enterprise"                    # Name of the service created by Helm
     namespace = kubernetes_namespace.tfe.metadata[0].name # Namespace where the Helm chart deployed the service
   }
 }
@@ -75,10 +75,10 @@ data "kubernetes_service" "tfe" {
 
 # Create A record for External VIP API/UI
 resource "google_dns_record_set" "vip" {
-  count = var.expose == "External" ? 1:0
-  name = "tfe-${var.region}-${random_string.tfe.result}.${local.domain}."
-  type = "A"
-  ttl  = 100
+  count = var.expose == "External" ? 1 : 0
+  name  = "tfe-${var.region}-${random_string.tfe.result}.${local.domain}."
+  type  = "A"
+  ttl   = 100
 
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [data.kubernetes_service.tfe.status[0].load_balancer[0].ingress[0].ip]
@@ -91,5 +91,5 @@ output "retrieve_initial_admin_creation_token" {
 
 output "create_initial_admin_user" {
   value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/account/new?token="
-  
+
 }

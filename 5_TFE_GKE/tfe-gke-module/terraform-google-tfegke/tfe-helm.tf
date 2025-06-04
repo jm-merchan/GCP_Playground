@@ -24,7 +24,7 @@ resource "kubernetes_secret" "tls_secret" {
 # Create Secret for license
 resource "kubernetes_secret_v1" "license" {
   metadata {
-    name = "terraform-enterprise"
+    name      = "terraform-enterprise"
     namespace = kubernetes_namespace.tfe.metadata[0].name
   }
 
@@ -68,8 +68,8 @@ resource "kubernetes_secret" "bucket_access" {
 
 
 locals {
-  tfe_domain = substr( data.google_dns_managed_zone.env_dns_zone.dns_name, 0, length( data.google_dns_managed_zone.env_dns_zone.dns_name) - 1) 
-} 
+  tfe_domain = substr(data.google_dns_managed_zone.env_dns_zone.dns_name, 0, length(data.google_dns_managed_zone.env_dns_zone.dns_name) - 1)
+}
 
 
 resource "google_service_account_key" "mykey" {
@@ -84,7 +84,7 @@ locals {
       certData                              = base64encode("${local.tfe_cert}\n${local.tfe_ca}")
       keyData                               = base64encode(local.tfe_key)
       caCertData                            = base64encode(local.tfe_ca)
-      TFE_VERSION                           = "v202409-3"
+      TFE_VERSION                           = var.tfe_version
       TFE_HOSTNAME                          = "tfe-${var.region}-${random_string.tfe.result}.${local.domain}"
       TFE_IACT_SUBNETS                      = "0.0.0.0/0"
       TFE_DATABASE_HOST                     = google_sql_database_instance.postgres_instance.private_ip_address
@@ -96,7 +96,7 @@ locals {
       TFE_DATABASE_PASSWORD                 = var.db_password
       TFE_OBJECT_STORAGE_GOOGLE_CREDENTIALS = google_service_account_key.mykey.private_key
       TFE_LICENSE                           = var.tfe_license
-      service_account                       = google_service_account.service_account.email 
+      service_account                       = google_service_account.service_account.email
   })
 }
 
@@ -111,15 +111,15 @@ resource "helm_release" "tfe_enterprise" {
   chart     = "hashicorp/terraform-enterprise"
   version   = var.tfe_helm_release
   values    = [local.tfe_user_data]
-  wait = true
-  timeout = 3600
+  wait      = true
+  timeout   = 3600
 }
 
 output "test" {
- value = local.tfe_domain
+  value = local.tfe_domain
 }
 
 output "helm" {
-  value = helm_release.tfe_enterprise.values
+  value     = helm_release.tfe_enterprise.values
   sensitive = true
 }

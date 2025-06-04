@@ -61,13 +61,13 @@ variable "gke_autopilot_enable" {
 
 variable "machine_type" {
   description = "Machine type"
-  type    = string
-  default = "e2-medium"
+  type        = string
+  default     = "e2-medium"
 }
 
 variable "vault_version" {
   description = "Vault version expressed as X{n}.X{1,n}.X{1,n}, for example 1.16.3"
-  type = string
+  type        = string
 }
 
 variable "cluster-name" {
@@ -126,9 +126,9 @@ variable "vault_helm_release" {
 }
 
 variable "node_count" {
-  type    = number
+  type        = number
   description = "Number of Vault instances. Typically 3 or 5"
-  default = 3
+  default     = 3
 }
 
 variable "storage_location" {

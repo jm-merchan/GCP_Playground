@@ -1,28 +1,36 @@
-# Outputs for cluster1
-output "cluster1_fqdn_8200" {
-  value = module.vault1.fqdn_8200
+output "project_id" {
+  value       = module.tfe.project_id
+  description = "GCloud Project ID"
 }
 
-output "cluster1_init_remote" {
-  value = module.vault1.init_remote
+output "kubernetes_cluster_name" {
+  value       = module.tfe.kubernetes_cluster_name
+  description = "GKE Cluster Name"
 }
 
-output "cluster1_fqdn_8201" {
-  value = module.vault1.fqdn_8201
+output "kubernetes_cluster_host" {
+  value       = module.tfe.kubernetes_cluster_host
+  description = "GKE Cluster Host"
 }
 
-
-# --------------------------------------
-
-# Outputs for cluster2
-output "cluster2_fqdn_8200" {
-  value = module.vault2.fqdn_8200
+output "configure_kubectl" {
+  description = "gcloud command to configure your kubeconfig once the cluster has been created"
+  value       = module.tfe.configure_kubectl
 }
 
-output "cluster2_init_remote" {
-  value = module.vault2.init_remote
+output "helm" {
+  value     = module.tfe.helm
+  description = "Helm release values for TFE Enterprise"
+  sensitive = true
 }
 
-output "cluster2_fqdn_8201" {
-  value = module.vault2.fqdn_8201
+# https://developer.hashicorp.com/terraform/enterprise/deploy/initial-admin-user
+output "retrieve_initial_admin_creation_token" {
+  value = module.tfe.retrieve_initial_admin_creation_token
+  description = "URL to retrieve the initial admin creation token for TFE"
+}
+
+output "create_initial_admin_user" {
+  value = module.tfe.create_initial_admin_user
+  description = "URL to create the initial admin user for TFE. Attach the token from the previous output to this URL."
 }

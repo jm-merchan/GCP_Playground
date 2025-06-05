@@ -31,5 +31,21 @@ provider "acme" {
 }
 
 module "tfe" {
-  source               = "./terraform-google-tfe-gke"
+  source            = "./terraform-google-tfegke"
+  dns_zone_name_ext = var.dns_zone_name_ext
+  project_id        = var.project_id
+  vpc_name          = var.vpc_name
+  region            = var.region
+  location          = var.location
+  email             = var.email
+  instance_name     = var.instance_name
+  acme_prod         = var.acme_prod
+  tfe_license       = var.tfe_license
+  node_count        = var.node_count
+  db_username       = var.db_username
+  db_password       = var.db_password
+  create_network    = var.create_network
+  expose            = var.expose
+  tfe_version       = var.tfe_version
+
 }

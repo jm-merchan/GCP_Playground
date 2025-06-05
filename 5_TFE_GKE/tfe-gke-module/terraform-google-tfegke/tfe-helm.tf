@@ -5,22 +5,6 @@ resource "kubernetes_namespace" "tfe" {
   }
 }
 
-/*
-# Create Vault Certificate
-resource "kubernetes_secret" "tls_secret" {
-  metadata {
-    name      = "terraform-enterprise-certificates2"
-    namespace = kubernetes_namespace.tfe.metadata[0].name
-  }
-
-  binary_data = {
-    "cert.pem" = base64encode("${local.tfe_cert}\n${local.tfe_ca}")
-    "key.pem" = base64encode(local.tfe_key)
-    "custom_ca_certs.pem"  = base64encode(local.tfe_ca)
-  }
-}
-*/
-
 # Create Secret for license
 resource "kubernetes_secret_v1" "license" {
   metadata {
@@ -115,11 +99,3 @@ resource "helm_release" "tfe_enterprise" {
   timeout   = 3600
 }
 
-output "test" {
-  value = local.tfe_domain
-}
-
-output "helm" {
-  value     = helm_release.tfe_enterprise.values
-  sensitive = true
-}

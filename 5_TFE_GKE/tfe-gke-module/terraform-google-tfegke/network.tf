@@ -84,12 +84,4 @@ resource "google_dns_record_set" "vip" {
   rrdatas      = [data.kubernetes_service.tfe.status[0].load_balancer[0].ingress[0].ip]
 }
 
-# https://developer.hashicorp.com/terraform/enterprise/deploy/initial-admin-user
-output "retrieve_initial_admin_creation_token" {
-  value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/retrieve-iact"
-}
 
-output "create_initial_admin_user" {
-  value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/account/new?token="
-
-}

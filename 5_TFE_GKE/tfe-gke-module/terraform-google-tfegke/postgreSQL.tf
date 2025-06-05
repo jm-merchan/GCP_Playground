@@ -52,6 +52,10 @@ resource "google_sql_database_instance" "postgres_instance" {
       ssl_mode        = "ENCRYPTED_ONLY"
       private_network = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
     }
+    database_flags {
+      name  = "max_connections"
+      value = "200"
+    }
   }
 }
 

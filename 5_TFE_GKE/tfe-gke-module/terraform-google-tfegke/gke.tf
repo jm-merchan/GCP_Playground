@@ -1,14 +1,22 @@
 resource "google_container_cluster" "default" {
-  # Add reference to autopilot in name if autopilot cluster
-  name = var.gke_autopilot_enable == false ? "${var.region}-gke-cluster${random_string.tfe.result}" : "${var.region}-autopilot-cluster${random_string.tfe.result}"
+  name     = var.gke_autopilot_enable ? "${var.region}-autopilot-cluster${random_string.tfe.result}" : "${var.region}-gke-cluster${random_string.tfe.result}"
+  location = var.region
 
-  location                 = var.region
-  enable_autopilot         = var.gke_autopilot_enable
+  enable_autopilot = var.gke_autopilot_enable
   enable_l4_ilb_subsetting = true
 
-  network            = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
-  subnetwork         = google_compute_subnetwork.subnet1.id
-  initial_node_count = 2
+  network    = var.create_vpc == true ? google_compute_network.global_vpc[0].id : local.vpc_reference
+  subnetwork = google_compute_subnetwork.subnet1.id
+
+  # Solo para clústeres estándar (no Autopilot)
+  dynamic "node_config" {
+    for_each = var.gke_autopilot_enable ? [] : [1]
+    content {
+      machine_type = var.machine_type
+    }
+  }
+
+  initial_node_count = var.gke_autopilot_enable ? null : var.node_count
 
   ip_allocation_policy {
     stack_type                    = "IPV4"
@@ -16,11 +24,8 @@ resource "google_container_cluster" "default" {
     cluster_secondary_range_name  = google_compute_subnetwork.subnet1.secondary_ip_range[1].range_name
   }
 
-  # Set `deletion_protection` to `true` will ensure that one cannot
-  # accidentally delete this instance by use of Terraform.
   deletion_protection = false
 
-  # IMPORTANT required to enable workload identity
   workload_identity_config {
     workload_pool = "${data.google_client_config.default.project}.svc.id.goog"
   }
@@ -31,28 +36,4 @@ resource "google_service_account" "default" {
   count        = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
   account_id   = "service-account-gke-${random_string.tfe.result}"
   display_name = "Service Account for GKE Node Pool"
-}
-
-
-resource "google_container_node_pool" "primary_preemptible_nodes" {
-  count      = (var.gke_autopilot_enable || var.with_node_pool) ? 0 : 1
-  name       = "${var.region}-node-pool-${random_string.tfe.result}"
-  location   = var.region
-  cluster    = google_container_cluster.default.name
-  node_count = var.node_count
-
-
-  node_config {
-    preemptible  = false
-    machine_type = var.machine_type
-
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    service_account = google_service_account.default[0].email
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-  }
 }

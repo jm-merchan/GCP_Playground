@@ -34,3 +34,12 @@ output "create_initial_admin_user" {
   value = module.tfe.create_initial_admin_user
   description = "URL to create the initial admin user for TFE. Attach the token from the previous output to this URL."
 }
+
+output "remove_database_before_destroy" {
+  value       = module.tfe.remove_database_before_destroy
+  description = "Command to remove the Postgres database before destroying the TFE deployment"
+}
+output "remove_peering_before_destroy" {
+  value       = module.tfe.remove_peering_before_destroy
+  description = "Command to remove the VPC peering before destroying the TFE deployment"
+}

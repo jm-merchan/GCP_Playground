@@ -36,3 +36,12 @@ output "create_initial_admin_user" {
   value = "https://tfe-${var.region}-${random_string.tfe.result}.${local.domain}/admin/account/new?token="
 
 }
+
+output "remove_database_before_destroy" {
+  description = "Postgres database is loaded with data out-of-band and so it is required to remove it out of band too"
+  value       = "gcloud sql instances delete ${google_sql_database_instance.postgres_instance.name} --project=${var.project_id}"
+}
+
+output "remove_peering_before_destroy" {
+  value = "gcloud compute networks peerings delete ${google_service_networking_connection.private_vpc_connection.peering} --network=${google_compute_network.global_vpc[0].name} --project=${var.project_id}"
+}
